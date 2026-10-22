@@ -1,0 +1,203 @@
+.xtrim-carousel {
+  position: relative;
+  border-radius: 0.28571429rem;
+  overflow: hidden;
+  background: var(--xtrim-ink);
+  margin-bottom: 2.5rem;
+}
+
+.xtrim-carousel__stage {
+  position: relative;
+  min-height: 22rem;
+}
+
+.xtrim-carousel__slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: stretch;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 420ms ease-out, visibility 420ms ease-out;
+}
+
+.xtrim-carousel__slide.is-active {
+  opacity: 1;
+  visibility: visible;
+  position: relative;
+}
+
+.xtrim-carousel__image {
+  flex: 1 1 55%;
+  background-size: cover;
+  background-position: center;
+  min-height: 22rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* The image of the slide is a real <img> (HU-30): the first one, the one
+   that is on screen when the page opens, is the candidate to be the largest
+   paint, so it is the one that is asked for first. */
+.xtrim-carousel__image img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.xtrim-carousel__body {
+  flex: 1 1 45%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  color: #ffffff;
+}
+
+.xtrim-carousel__title {
+  font-size: 1.9rem;
+  line-height: 1.2;
+  margin: 0;
+  color: #ffffff;
+}
+
+.xtrim-carousel__price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.xtrim-carousel__price .xtrim-price-original {
+  color: var(--xtrim-fog);
+}
+
+.xtrim-carousel__price .xtrim-price-final {
+  color: #ffffff;
+  font-size: 1.8rem;
+}
+
+/* La tinta verde no entra en la pizarra: sobre el carrusel el descuento
+   habla en Verde Precio puro, que ahí tiene el contraste (6:1 sobre ink). */
+.xtrim-carousel__price .xtrim-price-discount {
+  color: var(--xtrim-price);
+}
+
+.xtrim-carousel__price .xtrim-price-currency {
+  color: var(--xtrim-muted);
+}
+
+.xtrim-carousel__empty {
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--xtrim-fog);
+}
+
+.xtrim-carousel__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--xtrim-ink);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.xtrim-carousel__arrow:hover {
+  background: #ffffff;
+}
+
+.xtrim-carousel__arrow--previous {
+  left: 0.75rem;
+}
+
+.xtrim-carousel__arrow--next {
+  right: 0.75rem;
+}
+
+.xtrim-carousel__dots {
+  position: absolute;
+  bottom: 0.9rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  z-index: 2;
+}
+
+.xtrim-carousel__dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+}
+
+.xtrim-carousel__dot.is-active {
+  background: #ffffff;
+  transform: scale(1.25);
+}
+
+@media (max-width: 767px) {
+  .xtrim-carousel__stage {
+    min-height: 0;
+  }
+
+  .xtrim-carousel__slide {
+    flex-direction: column;
+  }
+
+  .xtrim-carousel__slide:not(.is-active) {
+    /* Fuera de pantalla, pero en el HTML: el crawler las sigue viendo. */
+    height: 0;
+  }
+
+  .xtrim-carousel__image {
+    min-height: 12rem;
+  }
+
+  /* Sobre la imagen, no sobre el cuerpo: la flecha no compite con la
+     etiqueta ni con los botones. */
+  .xtrim-carousel__arrow {
+    top: 6rem;
+  }
+
+  .xtrim-carousel__body {
+    padding: 1.25rem;
+    /* El carril de los puntos: la respuesta no se pisa con los botones. */
+    padding-bottom: 2.75rem;
+  }
+
+  /* Los botones del cuerpo no compiten a lo ancho con el teléfono: usan el
+     paso que traen, sin estirarse. */
+  .xtrim-carousel__body .ui.buttons {
+    width: 100%;
+  }
+
+  .xtrim-carousel__body .ui.buttons .button {
+    width: 50%;
+  }
+
+  .xtrim-carousel__title {
+    font-size: 1.4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xtrim-carousel__slide {
+    transition: none;
+  }
+}

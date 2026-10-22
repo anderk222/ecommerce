@@ -1,0 +1,17 @@
+.xtrim-spec-row {
+  margin-bottom: 0 !important;
+}
+
+/* The selected voice of the chips: Azul Señal takes the chip, the word turns
+   white — the values wear the shim, the !important answers Fomantic. */
+.xtrim-selected {
+  background: var(--xtrim-primary) !important;
+  color: #ffffff !important;
+}
+
+/* An unwritten category is still a click: the chip says so with the cursor. */
+.xtrim-form-categorias .ui.label {
+  cursor: pointer;
+}
+
+/* The count falls to the global sheet (the migration of its literal). */

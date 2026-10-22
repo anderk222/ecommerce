@@ -1,0 +1,46 @@
+<div class="ui container">
+  <h1 class="ui header">Categorías</h1>
+
+  @if (categories.hasValue()) {
+    @if (categories.value().length) {
+      <div class="ui stackable grid">
+        @for (category of categories.value(); track category.id) {
+          <div class="four wide column xtrim-column">
+            <!-- La tarjeta entera es el enlace: el título guarda el color de enlace
+                 por convención, sin anidar links (la voz de la tarjeta del catálogo). -->
+            <a class="ui fluid card xtrim-card" [routerLink]="['/categorias', category.slug]">
+              <div class="content">
+                <div class="header">
+                  <span class="title">{{ category.name }}</span>
+                </div>
+                <div class="description xtrim-category-card__count">
+                  {{ category.itemCount }}
+                  {{ category.itemCount === 1 ? 'ítem' : 'ítems' }}
+                </div>
+              </div>
+            </a>
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- Cargada y vacía: el estado dice su nombre en vez de girar por siempre. -->
+      <p class="xtrim-muted">Todavía no hay categorías en el catálogo.</p>
+    }
+  } @else if (categories.error()) {
+    <!-- La negativa tiene voz (P51 D3): antes el fallo era un esqueleto eterno.
+         La caja habla con la voz de la casa y deja reintentar. -->
+    <div class="xtrim-message is-error" role="alert"
+      animate.enter="xtrim-message--enter"
+      animate.leave="xtrim-message--leave"
+    >
+      <i class="exclamation circle icon" aria-hidden="true"></i>
+      <span>No pudimos cargar las categorías.</span>
+    </div>
+    <button class="ui button" type="button" (click)="categories.reload()">Reintentar</button>
+  } @else if (categories.isLoading()) {
+    <!-- La reserva del esqueleto (HU-30): la rejilla no salta cuando llegan las tarjetas. -->
+    <div class="ui segment">
+      <app-loading [lines]="4" label="Cargando las categorías" />
+    </div>
+  }
+</div>

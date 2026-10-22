@@ -1,0 +1,113 @@
+<div class="ui container">
+  <div class="xtrim-contact">
+    <div class="ui segment">
+      <h1 class="ui header">Solicitar más información</h1>
+      <p>
+        Déjanos tus datos y te contactamos. También puedes escribirnos por
+        WhatsApp desde la página del producto.
+      </p>
+
+      @if (done()) {
+        <div
+          class="ui positive message"
+          animate.enter="enter-animation"
+          animate.leave="leave-animation"
+        >
+          <div class="header">¡Gracias!</div>
+          <p>Recibimos tu solicitud. Te contactaremos muy pronto.</p>
+        </div>
+      } @else {
+        @if (contactMessage(); as text) {
+          <div
+            class="xtrim-message"
+            [class.is-error]="contactFailed()"
+            [attr.role]="contactFailed() ? 'alert' : 'status'"
+            aria-live="polite"
+            animate.enter="xtrim-message--enter"
+            animate.leave="xtrim-message--leave"
+          >
+            @if (contactFailed()) {
+              <i class="exclamation circle icon" aria-hidden="true"></i>
+            } @else {
+              <i class="check circle outline icon" aria-hidden="true"></i>
+            }
+            <span>{{ text }}</span>
+          </div>
+        }
+
+        <form class="ui form" novalidate (submit)="submit($event)">
+          <div class="two fields">
+            <div class="field with-room">
+              <label for="contact-name" class="xtrim-required">Nombre</label>
+              <input
+                id="contact-name"
+                type="text"
+                [formField]="contactForm.name"
+                [class.xtrim-flagged]="(contactForm.name().touched() || attempted()) && contactForm.name().invalid()"
+                [attr.aria-invalid]="(contactForm.name().touched() || attempted()) && contactForm.name().invalid() ? 'true' : null"
+                aria-describedby="contact-name-error"
+              />
+              @if ((contactForm.name().touched() || attempted()) && contactForm.name().invalid()) {
+                <small class="xtrim-error" id="contact-name-error">{{ contactForm.name().errors()[0].message }}</small>
+              }
+            </div>
+            <div class="field with-room">
+              <label for="contact-email" class="xtrim-required">Correo</label>
+              <input
+                id="contact-email"
+                type="email"
+                [formField]="contactForm.email"
+                [class.xtrim-flagged]="(contactForm.email().touched() || attempted()) && contactForm.email().invalid()"
+                [attr.aria-invalid]="(contactForm.email().touched() || attempted()) && contactForm.email().invalid() ? 'true' : null"
+                aria-describedby="contact-email-error"
+              />
+              @if ((contactForm.email().touched() || attempted()) && contactForm.email().invalid()) {
+                <small class="xtrim-error" id="contact-email-error">{{ contactForm.email().errors()[0].message }}</small>
+              }
+            </div>
+          </div>
+
+          <div class="two fields">
+            <div class="field">
+              <label for="contact-phone">Teléfono</label>
+              <input
+                id="contact-phone"
+                type="tel"
+                placeholder="09XXXXXXXX"
+                [formField]="contactForm.phone"
+              />
+            </div>
+            <div class="field">
+              <label for="contact-province">Provincia</label>
+              <select id="contact-province" [formField]="contactForm.province">
+                @for (option of provinces; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="contact-message">Mensaje</label>
+            <textarea id="contact-message" rows="4" [formField]="contactForm.message"></textarea>
+          </div>
+
+          <div class="inline field">
+            <div class="ui checkbox">
+              <input id="contact-consent" type="checkbox" [formField]="contactForm.consent" />
+              <label for="contact-consent" class="xtrim-required">Acepto que me contacten</label>
+            </div>
+          </div>
+
+          <button
+            class="ui primary button"
+            type="submit"
+            [disabled]="busy() || !consent"
+          >
+            {{ busy() ? 'Enviando…' : 'Enviar solicitud' }}
+          </button>
+        </form>
+      }
+    </div>
+  </div>
+</div>

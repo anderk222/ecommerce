@@ -1,0 +1,193 @@
+<div class="ui container">
+  @if (confirmation(); as order) {
+    <div class="ui segment xtrim-confirmation">
+      <h1 class="ui header">¡Gracias por tu compra!</h1>
+      <p>
+        Registramos tu pedido <strong>#{{ order.orderId }}</strong>. Como no hay pasarela de
+        pagos, no se realizó ningún cargo: tu pedido queda confirmado y nos pondremos en
+        contacto contigo.
+      </p>
+      <!-- El recibo cargado (P30): la tabla es la página, la conclusión en la voz del dinero,
+           el inventario de la verdad — nada inventado arriba de lo que pasó. -->
+      <table class="ui table xtrim-ledger">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th class="right aligned">Precio</th>
+            <th class="right aligned">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of order.lines; track line.itemName) {
+            <tr>
+              <td>{{ line.itemName }}</td>
+              <td>{{ line.quantity }}</td>
+              <td class="right aligned">
+                <span class="xtrim-money">{{ line.unitPrice.toFixed(2) }}</span>
+              </td>
+              <td class="right aligned">
+                <span class="xtrim-money">{{ line.lineTotal.toFixed(2) }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="3">Total</th>
+            <th class="right aligned">
+              <span class="xtrim-total">${{ order.total.toFixed(2) }}</span>
+              <span class="xtrim-money__currency">{{ order.currency }}</span>
+            </th>
+          </tr>
+        </tfoot>
+      </table>
+      <a class="ui primary button" routerLink="/">Volver al inicio</a>
+    </div>
+  } @else {
+    <h1 class="ui header">Finalizar compra</h1>
+
+    @if (empty()) {
+      <div class="ui segment">
+        <p>Tu carrito está vacío.</p>
+        <a class="ui primary button" routerLink="/productos">Ver productos</a>
+      </div>
+    } @else {
+      @if (message(); as text) {
+        <!-- La voz de la conversación (P42): el mensaje general del submit
+             invalidado, la negación del consent y la frase del servidor
+             (409/stock insuficiente) llegan verbatim — una sola caja, una sola
+             voz (D4); no hay nota de éxito: la confirmación es la palabra. -->
+        <div class="xtrim-message" [class.is-error]="failed()" [attr.role]="failed() ? 'alert' : 'status'" aria-live="polite"
+          animate.enter="xtrim-message--enter"
+          animate.leave="xtrim-message--leave"
+        >
+          @if (failed()) {
+            <i class="exclamation circle icon" aria-hidden="true"></i>
+          } @else {
+            <i class="check circle outline icon" aria-hidden="true"></i>
+          }
+          <span>{{ text }}</span>
+        </div>
+      }
+
+      <div class="ui stackable grid">
+        <div class="eight wide column xtrim-column">
+          <div class="ui segment">
+            <h2 class="ui header">Tus datos</h2>
+            <form class="ui form" novalidate (submit)="submit($event)">
+              <div class="two fields">
+                <div class="field with-room">
+                  <label for="checkout-name" class="xtrim-required">Nombre</label>
+                  <input
+                    id="checkout-name"
+                    type="text"
+                    [formField]="checkoutForm.name"
+                    [class.xtrim-flagged]="(checkoutForm.name().touched() || attempted()) && checkoutForm.name().invalid()"
+                    [attr.aria-invalid]="(checkoutForm.name().touched() || attempted()) && checkoutForm.name().invalid() ? 'true' : null"
+                    aria-describedby="checkout-name-error"
+                  />
+                  @if ((checkoutForm.name().touched() || attempted()) && checkoutForm.name().invalid()) {
+                    <!-- La palabra del contrato, bajo el input que la pide (P42):
+                         visible solo tocada-inválida o tras un intento. -->
+                    <small class="xtrim-error" id="checkout-name-error">{{
+                      checkoutForm.name().errors()[0].message
+                    }}</small>
+                  }
+                </div>
+                <div class="field with-room">
+                  <label for="checkout-email" class="xtrim-required">Correo</label>
+                  <input
+                    id="checkout-email"
+                    type="email"
+                    [formField]="checkoutForm.email"
+                    [class.xtrim-flagged]="(checkoutForm.email().touched() || attempted()) && checkoutForm.email().invalid()"
+                    [attr.aria-invalid]="(checkoutForm.email().touched() || attempted()) && checkoutForm.email().invalid() ? 'true' : null"
+                    aria-describedby="checkout-email-error"
+                  />
+                  @if ((checkoutForm.email().touched() || attempted()) && checkoutForm.email().invalid()) {
+                    <small class="xtrim-error" id="checkout-email-error">{{
+                      checkoutForm.email().errors()[0].message
+                    }}</small>
+                  }
+                </div>
+              </div>
+
+              <div class="two fields">
+                <div class="field">
+                  <label for="checkout-phone">Teléfono</label>
+                  <input
+                    id="checkout-phone"
+                    type="tel"
+                    placeholder="09XXXXXXXX"
+                    [formField]="checkoutForm.phone"
+                  />
+                </div>
+                <div class="field">
+                  <label for="checkout-province">Provincia</label>
+                  <select id="checkout-province" [formField]="checkoutForm.province">
+                    @for (option of provinces; track option.value) {
+                      <option [value]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="inline field">
+                <div class="ui checkbox">
+                  <input
+                    id="checkout-consent"
+                    type="checkbox"
+                    [formField]="checkoutForm.consent"
+                  />
+                  <label for="checkout-consent" class="xtrim-required"
+                    >Acepto que me contacten</label
+                  >
+                </div>
+              </div>
+
+              <button
+                class="ui primary button"
+                type="submit"
+                [disabled]="busy() || !consent"
+              >
+                {{ busy() ? 'Confirmando…' : 'Confirmar compra' }}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="eight wide column xtrim-column">
+          <div class="ui segment">
+            <h2 class="ui header">Tu pedido</h2>
+            <!-- El estimado (P30 D2): la aritmética en Pizarra, tabular — nunca la
+                 voz del dinero, que queda para la verdad cargada del recibo. -->
+            <table class="ui table xtrim-ledger">
+              <tbody>
+                @for (line of lines(); track line.itemId) {
+                  <tr>
+                    <td>{{ line.name }} × {{ line.quantity }}</td>
+                    <td class="right aligned">
+                      <span class="xtrim-money">${{ (line.price * line.quantity).toFixed(2) }}</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Total</th>
+                  <th class="right aligned">
+                    <span class="xtrim-money">${{ cart.total().toFixed(2) }}</span>
+                  </th>
+                </tr>
+              </tfoot>
+            </table>
+            <p class="xtrim-note">
+              El precio final lo calcula el servidor, con los descuentos vigentes.
+            </p>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

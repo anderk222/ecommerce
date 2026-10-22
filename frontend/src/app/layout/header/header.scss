@@ -1,0 +1,106 @@
+.xtrim-logo {
+  color: var(--xtrim-primary);
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+}
+
+form.item {
+  margin: 0;
+}
+
+/* The search sits at the same height as the rest of the masthead and holds
+   its breath on the desktop: wide enough to show what it is for. */
+.ui.menu .right.menu .ui.icon.input {
+  min-width: 18rem;
+}
+
+.ui.menu .right.menu .ui.icon.input input::placeholder {
+  color: var(--xtrim-muted);
+}
+
+/* The cart says how much it holds: the count in the chip voice of the system
+   — paper, hairline, Etiqueta — no more than the number. */
+.xtrim-cart__count {
+  background: var(--xtrim-canvas);
+  border: 1px solid var(--xtrim-hairline);
+  border-radius: 0.28571429rem;
+  color: var(--xtrim-label);
+  font-variant-numeric: tabular-nums;
+  padding: 0.2rem 0.5rem;
+  margin-left: 0.35rem;
+}
+
+/* The money waits in a dropdown: it appears on the hover, and a keyboard on
+   the focus — the amount dressed in the ink of the price, the units quiet.
+   It opens under the icon, aligned to its right edge so it never leaves the
+   container. */
+.xtrim-cart {
+  position: relative;
+}
+
+.xtrim-cart__menu {
+  position: absolute;
+  top: calc(100% + 2px);
+  right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 10.5rem;
+  padding: 0.6rem 0.8rem;
+  background: #fff;
+  border: 1px solid var(--xtrim-hairline);
+  border-radius: 0.28571429rem;
+  box-shadow: 0 2px 3px 0 rgba(34, 36, 38, 0.15);
+  opacity: 0;
+  transform: translateY(2px);
+  pointer-events: none;
+  transition: opacity 0.1s ease, transform 0.1s ease;
+}
+
+.xtrim-cart:hover .xtrim-cart__menu,
+.xtrim-cart:focus-within .xtrim-cart__menu {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.xtrim-cart__menu-label {
+  font-size: 0.8rem;
+  color: var(--xtrim-muted);
+}
+
+.xtrim-cart__menu-total {
+  color: var(--xtrim-price-ink);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.xtrim-cart__menu-units {
+  font-size: 0.85rem;
+  color: var(--xtrim-label);
+}
+
+/* The keyboard does not arrive invisible: the items of the masthead answer
+   with a ring inside their own bounds, so it never clips on the edge. */
+.ui.menu a.item:focus-visible {
+  outline: 2px solid var(--xtrim-primary);
+  outline-offset: -2px;
+}
+
+@media (max-width: 767px) {
+  /* The search takes its own row and the whole width it needs; the cart
+     keeps its place at the right edge of that row. */
+  .ui.menu .right.menu {
+    gap: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .ui.menu .right.menu form.item {
+    flex: 1 1 auto;
+  }
+
+  .ui.menu .right.menu .ui.icon.input {
+    width: 100%;
+    min-width: 0;
+  }
+}

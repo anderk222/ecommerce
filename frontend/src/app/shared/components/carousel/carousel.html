@@ -1,0 +1,94 @@
+<section
+  class="xtrim-carousel"
+  aria-roledescription="carrusel"
+  aria-label="Productos destacados"
+  (mouseenter)="setPaused(true)"
+  (mouseleave)="setPaused(false)"
+  (focusin)="setPaused(true)"
+  (focusout)="setPaused(false)"
+>
+  <div class="xtrim-carousel__stage">
+    @for (item of items(); track item.id; let position = $index) {
+      <article
+        class="xtrim-carousel__slide"
+        [class.is-active]="position === index()"
+        [attr.aria-hidden]="position === index() ? null : 'true'"
+      >
+        <div class="xtrim-carousel__image">
+          @if (item.image; as image) {
+            <img
+              [src]="image"
+              [alt]="item.name"
+              width="800"
+              height="600"
+              [attr.loading]="position === 0 ? 'eager' : 'lazy'"
+              [attr.fetchpriority]="position === 0 ? 'high' : null"
+              decoding="async"
+            />
+          }
+        </div>
+
+        <div class="xtrim-carousel__body">
+          <!-- La misma palabra que en la tarjeta, el mismo traje (P34 D2):
+               el chip callado, el amarillo de Fomantic fuera para siempre. -->
+          <span class="ui tiny label xtrim-chip">Destacado</span>
+
+          <h2 class="xtrim-carousel__title">{{ item.name }}</h2>
+
+          <div class="xtrim-carousel__price">
+            @if (item.price.discountPercentage > 0) {
+              <span class="xtrim-price-original">{{ item.price.basePrice }}</span>
+              <span class="xtrim-price-final">{{ item.price.finalPrice }}</span>
+              <span class="xtrim-price-currency">{{ item.price.currency }}</span>
+              <span class="xtrim-price-discount">-{{ item.price.discountPercentage }}%</span>
+            } @else {
+              <span class="xtrim-price-final is-not-discounted">{{ item.price.finalPrice }}</span>
+              <span class="xtrim-price-currency">{{ item.price.currency }}</span>
+            }
+          </div>
+
+          <div class="ui buttons">
+            <a class="ui primary button" [routerLink]="linkOf(item)">Ver el producto</a>
+            <a class="ui button" [routerLink]="linkOf(item)" [queryParams]="{ origin: 'carrusel' }">
+              Más información
+            </a>
+          </div>
+        </div>
+      </article>
+    } @empty {
+      <div class="xtrim-carousel__empty">No hay productos destacados en este momento.</div>
+    }
+  </div>
+
+  @if (hasSeveral()) {
+    <button
+      class="xtrim-carousel__arrow xtrim-carousel__arrow--previous"
+      type="button"
+      aria-label="Anterior"
+      (click)="previous()"
+    >
+      <i class="left chevron icon"></i>
+    </button>
+    <button
+      class="xtrim-carousel__arrow xtrim-carousel__arrow--next"
+      type="button"
+      aria-label="Siguiente"
+      (click)="next()"
+    >
+      <i class="right chevron icon"></i>
+    </button>
+
+    <div class="xtrim-carousel__dots" role="tablist" aria-label="Ir a la diapositiva">
+      @for (item of items(); track item.id; let position = $index) {
+        <button
+          class="xtrim-carousel__dot"
+          [class.is-active]="position === index()"
+          [attr.aria-current]="position === index() ? 'true' : null"
+          [attr.aria-label]="'Diapositiva ' + (position + 1)"
+          type="button"
+          (click)="goTo(position)"
+        ></button>
+      }
+    </div>
+  }
+</section>

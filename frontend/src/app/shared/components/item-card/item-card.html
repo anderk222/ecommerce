@@ -1,0 +1,49 @@
+<a class="ui fluid card xtrim-card" [routerLink]="link()">
+  <div class="image xtrim-card__image">
+    @if (item().image; as image) {
+      <img
+        [src]="image"
+        [alt]="item().name"
+        width="800"
+        height="600"
+        loading="lazy"
+        decoding="async"
+      />
+    } @else {
+      <!-- El cuadro nunca se mueve (HU-30): sin imagen, el lienzo reserva la altura. -->
+    }
+  </div>
+
+  <div class="content">
+    <div class="xtrim-card__badges">
+      @if (item().featured) {
+        <span class="ui tiny label xtrim-chip">Destacado</span>
+      }
+      @if (item().stock === 0) {
+        <span class="ui tiny label xtrim-chip">Sin stock</span>
+      }
+    </div>
+
+    <div class="header">
+      <span class="title">{{ item().name }}</span>
+    </div>
+
+    <div class="meta">
+      @if (item().categories.length) {
+        <span class="text">{{ item().categories.join(' · ') }}</span>
+      }
+    </div>
+
+    <div class="description xtrim-card__price">
+      @if (discounted()) {
+        <span class="xtrim-price-original">{{ item().price.basePrice }}</span>
+        <span class="xtrim-price-final">{{ item().price.finalPrice }}</span>
+        <span class="xtrim-price-currency">{{ item().price.currency }}</span>
+        <span class="xtrim-price-discount">-{{ item().price.discountPercentage }}%</span>
+      } @else {
+        <span class="xtrim-price-final is-not-discounted">{{ item().price.finalPrice }}</span>
+        <span class="xtrim-price-currency">{{ item().price.currency }}</span>
+      }
+    </div>
+  </div>
+</a>

@@ -1,0 +1,1068 @@
+/* ==========================================================================
+   Xtrim — global styles
+
+   Fomantic UI provides the components. What is here is the handful of rules
+   the site needs on top of them, plus the responsive tweaks that keep the
+   catalogue usable on a phone (mobile first, HU-30).
+   ========================================================================== */
+
+:root {
+  /* The width of the container every page composes inside. */
+  --xtrim-content-width: 1200px;
+
+  /* The palette, one token per colour of the system (DESIGN.md). */
+  --xtrim-primary: #2185d0;
+  --xtrim-primary-deep: #1e70bf;
+  --xtrim-price: #21ba45;
+  --xtrim-price-ink: #167439;
+  --xtrim-ink: #1f2933;
+  --xtrim-canvas: #f7f9fb;
+  --xtrim-label: #52606d;
+  --xtrim-muted: #9aa5b1;
+  --xtrim-border: #e4e7eb;
+  --xtrim-fog: #cbd2d9;
+  --xtrim-hairline: #d4d4d5;
+
+  /* The canvas the panel answers on hover (the Kanban column of P32): the
+     paper's one tone darker, born here before use (P32 D6). */
+  --xtrim-canvas-active: #d9e2ec;
+
+  /* The tones of the lead's timeline (P35 D4): the Fomantic statuses the CRM
+     legend already speaks, the quiet grey and the money ink — every one born
+     in the shim before its first use, and never a third accent. */
+  --xtrim-tone-blue: var(--xtrim-primary);
+  --xtrim-tone-green: var(--xtrim-price);
+  --xtrim-tone-red: #db2829;
+  --xtrim-tone-yellow: #fbbd08;
+  --xtrim-tone-orange: #f2711c;
+  --xtrim-tone-grey: var(--xtrim-muted);
+  --xtrim-tone-money: var(--xtrim-price-ink);
+}
+
+/**
+ * The fallback of Lato, with the metrics of Lato.
+ *
+ * <p>Without it, the browser paints the text with Arial and moves it when
+ * Lato arrives: on a mobile connection that was a shift of 0.10 (HU-30).
+ * These overrides make the fallback occupy exactly the same space as Lato,
+ * so the text does not move.
+ *
+ * <p>The numbers come from the fonts themselves: Lato has an x-height of
+ * 50.65% of its em and an ascent of 98.70%; Arial —which is what
+ * Liberation Sans replaces on Linux— has an x-height of 52.83% and an
+ * ascent of 90.53%. The `size-adjust` scales the fallback so that its
+ * x-height is the one of Lato, and the other three put the line where Lato
+ * puts it.
+ */
+@font-face {
+  font-family: 'Lato Fallback';
+  src:
+    local('Arial'),
+    local('Liberation Sans'),
+    local('Helvetica Neue'),
+    local('DejaVu Sans');
+  size-adjust: 95.88%;
+  ascent-override: 98.7%;
+  descent-override: 21.3%;
+  line-gap-override: 0%;
+}
+
+body {
+  background: var(--xtrim-canvas);
+  color: var(--xtrim-ink);
+  font-family: 'Lato', 'Lato Fallback', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* The browser surfaces the design does not draw still carry the system:
+   the text selected and the focus of the keyboard answer in Azul Señal. */
+::selection {
+  background: var(--xtrim-primary);
+  color: #ffffff;
+}
+
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--xtrim-primary);
+  outline-offset: 2px;
+}
+
+.ui.container {
+  width: min(var(--xtrim-content-width), calc(100% - 2rem));
+}
+
+/* --- The header ---------------------------------------------------------- */
+.ui.menu > .ui.container {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ui.menu .right.menu {
+  margin-left: auto;
+  align-items: center;
+}
+
+/* --- The footer ---------------------------------------------------------- */
+.ui.footer.segment {
+  background: var(--xtrim-ink);
+  color: var(--xtrim-fog);
+}
+
+.ui.footer .ui.header {
+  color: #ffffff;
+}
+
+.ui.footer a {
+  color: var(--xtrim-muted);
+}
+
+.ui.footer a:hover {
+  color: #ffffff;
+}
+
+/* Fomantic 2.9 reads every <ul class="ui list"> as a bulleted list: it draws
+   a marker (`ul.ui.list li::before`) and indents the list 1.25rem. The
+   footer's column lists are wayfinding links, not enumerations — the marker
+   and the indent go. */
+.ui.footer ul.ui.list {
+  margin-left: 0;
+}
+
+.ui.footer ul.ui.list li::before {
+  content: none;
+}
+
+.xtrim-copyright {
+  font-size: 0.875rem;
+  color: var(--xtrim-muted);
+}
+
+/* The closing bar of the footer: the copyright on the left, the one action
+   of the visit on the right. A flex row that wraps on narrow widths instead
+   of overflowing — the bar answers both breakpoints by construction (P37). */
+.xtrim-footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* --- The pager of the listings -------------------------------------------- */
+/* The pager is a tool: pages are buttons (a key can reach them), the one the
+   visitor is on is signalled with Azul Señal, and nothing floats without the
+   cursor having spoken first. */
+.xtrim-pager {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0 1rem;
+}
+
+.ui.pagination.menu button.item {
+  background: transparent;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.ui.pagination.menu button.item:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.ui.pagination.menu button.item.active {
+  background: var(--xtrim-primary);
+  color: #ffffff;
+}
+
+.ui.pagination.menu button.item.is-disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* --- The cards of the catalogue ------------------------------------------ */
+.xtrim-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.xtrim-card .image {
+  background-size: cover;
+  background-position: center;
+  min-height: 180px;
+}
+
+/* The image of the card is a real <img> (HU-30): it can be lazy and it
+   declares its size, so the page does not move when it arrives. The box
+   keeps the height it had, and the image covers it. */
+.xtrim-card__image {
+  position: relative;
+  overflow: hidden;
+  /* Without an image (or while a lazy one arrives) the box is the paper of
+     the system, never blank white: the catalogue keeps its grid visible. */
+  background: var(--xtrim-canvas);
+}
+
+.xtrim-card__image img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The title of the card is not a link: the whole card is the link, and two
+   links cannot be nested —the browser breaks the HTML, the page does not
+   hydrate and the card has no name for the screen readers (HU-30). It keeps
+   the colour of a link. */
+.xtrim-card .title {
+  color: var(--xtrim-primary);
+}
+
+.xtrim-card:hover .title {
+  color: var(--xtrim-primary-deep);
+}
+
+.xtrim-card .content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1 1 auto;
+}
+
+.xtrim-card .title {
+  margin-bottom: 0;
+}
+
+/* --- The price ----------------------------------------------------------- */
+.xtrim-price-original {
+  text-decoration: line-through;
+  color: var(--xtrim-muted);
+  margin-right: 0.5rem;
+}
+
+.xtrim-price-final,
+.xtrim-price-original,
+.xtrim-price-discount {
+  /* The money compares: the digits keep their width from column to column. */
+  font-variant-numeric: tabular-nums;
+}
+
+.xtrim-price-final {
+  font-size: 1.35rem;
+  font-weight: 700;
+  /* The money voice as text on white is the ink tier of Verde Precio:
+     #21ba45 reads 2.6:1 on white; its ink reads 6:1. The brand accent
+     stays for surfaces that already give it contrast (DESIGN.md, P24). */
+  color: var(--xtrim-price-ink);
+}
+
+/* The discount percentage speaks with the money, not with promo: it sits in
+   the price line, in the ink tier of Verde Precio. */
+.xtrim-price-discount {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--xtrim-price-ink);
+  margin-left: 0.25rem;
+}
+
+/* Capable of leaving the page structure to assistive tech only — the hidden
+   h1 of the home (the template carries no visible one by design). */
+.xtrim-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.xtrim-price-final.is-not-discounted {
+  color: var(--xtrim-ink);
+}
+
+/* The currency accompanies the money in every surface: the card wrote it in
+   its sheet (P24); the detail consumes the same voice from the global sheet
+   here. */
+.xtrim-price-currency {
+  color: var(--xtrim-muted);
+  font-size: 0.85rem;
+}
+
+/* --- The quiet chip -------------------------------------------------------- */
+/* The chip of the badges and the states (Destacado, Sin stock, Disponible,
+   Servicio sin control de stock): the voice of Label — the information is
+   carried by the word, not by a loud fill. P24 authored it in the card; P25
+   promotes it so the detail tells the same truth in the same voice. */
+.ui.label.xtrim-chip {
+  background: var(--xtrim-canvas);
+  color: var(--xtrim-label);
+  border: 1px solid var(--xtrim-border);
+}
+
+/* --- The system message voice --------------------------------------------- */
+/* Born in the categories CRUD (P26); every later form of the pass (P27–P31)
+   speaks it instead of re-deciding it. A quiet box — paper, hairline, the
+   radius of the system — where the state is carried by the word and the
+   icon, never by a loud Fomantic fill. The error's icon wears the Fomantic
+   red of the destructive verdict (#db2829): the panel's one colour outside
+   the shim, recorded by name in the surface brief and in P26 D3. */
+.xtrim-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75em 1em;
+  background: #ffffff;
+  border: 1px solid var(--xtrim-border);
+  border-radius: 0.28571429rem;
+  margin-bottom: 1rem;
+}
+
+.xtrim-message .icon {
+  color: var(--xtrim-muted);
+  margin: 0;
+}
+
+.xtrim-message.is-error .icon {
+  color: #db2829; /* the destructive verdict — recorded, not invented here */
+}
+
+/* La voz del mensaje se mueve (P50): la caja que responde a un gesto
+   llega y se va con el MISMO movimiento — corto, quieto, sin ladear
+   la página. El instrumento es suyo: el par global (`.enter-animation`)
+   nació para las PANTALLAS que llegan, y sus dos segundos de fade
+   son una eternidad para una caja de texto. El número — 180 ms, 6 px —
+   no es inventado aquí: es el ejemplo de la casa (tech-stack §3.4). */
+.xtrim-message--enter {
+  animation: xtrim-message-in 1s ease-out;
+}
+
+.xtrim-message--leave {
+  animation: xtrim-message-out 0.5s ease-in;
+}
+
+@keyframes xtrim-message-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes xtrim-message-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+/* El movimiento es una cortesía, nunca una exigencia: quien pide menos
+   movimiento no recibe ninguno — la caja aparece y se va de golpe. */
+@media (prefers-reduced-motion: reduce) {
+  .xtrim-message--enter,
+  .xtrim-message--leave {
+    animation: none;
+  }
+}
+
+/* --- The ledger of the panel ----------------------------------------------- */
+/* The CRUD tables of /admin speak one instrument. P26 authored it for the
+   categories; P28 cites it for the catalog and grows it (money, links, the
+   null stock, the required mark); P32 will cite it for the CRM. */
+.xtrim-ledger th,
+.xtrim-ledger td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--xtrim-border);
+  text-align: left;
+}
+
+.xtrim-ledger th {
+  color: var(--xtrim-label);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.xtrim-ledger .xtrim-ledger__input {
+  width: 100%;
+  min-width: 9rem;
+  padding: 0.35em 0.75em;
+  border: 1px solid rgba(34, 36, 38, 0.15);
+  border-radius: 0.28571429rem;
+}
+
+.xtrim-ledger .xtrim-ledger__empty {
+  color: var(--xtrim-muted);
+  text-align: center;
+  padding: 1.5rem 0.75rem;
+}
+
+/* The links of a ledger row signal in Azul Señal — the row's link is the one
+   the cursor and the key both live on (P28). */
+.xtrim-ledger a {
+  color: var(--xtrim-primary);
+}
+
+/* The money cell of the ledger: the arithmetic is written in the ink of the
+   system with tabular digits, the currency accompanies it in Neblina, and the
+   discount closes the phrase in the ink of Verde Precio — the red label left
+   the price for good (P28 D3). */
+.xtrim-money {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.xtrim-money__currency {
+  color: var(--xtrim-muted);
+  margin-left: 0.25rem;
+}
+
+/* The stock that is not tracked is a word-truth: the dash belongs to
+   Etiqueta, never to a void (P28 D3). */
+.xtrim-null {
+  color: var(--xtrim-label);
+}
+
+/* The required mark of the workhand forms (P28 D4): the asterisk is a fact of
+   the validator, in Etiqueta — never a shout of colour. */
+.xtrim-required::after {
+  content: ' *';
+  color: var(--xtrim-label);
+  font-weight: 700;
+}
+
+/* La sala reservada de la palabra (P40 D7; la lección de P38): el campo que
+   puede decir «Este campo es requerido» paga su hueco de antemano y el botón
+   no salta cuando la línea llega. Una sola definición para toda la tienda.
+
+   LA PALABRA VIVE EN FLUJO (P42 D7; el gate de la alineación): posicionada
+   absoluta, la palabra ancla contra el PADDING-box del campo — y los campos
+   que Fomantic agrupa (`.ui.form .fields > .field`) cargan su gutter
+   (padding: 0 0.5em = 7px) — así la palabra caía 7px a la IZQUIERDA del
+   input y 2.5px ENCIMA de su borde inferior (la línea de ~18px cabía mal
+   en el asiento de 1.4rem). En flujo nace donde nace el input — el
+   content-box del campo es el mismo para los dos — y con height: 0 +
+   overflow visible no empuja nada: el asiento ya se pagó, ahora a 1.7rem
+   para la línea completa. Mide palabra == input en campo agrupado y
+   solitario por nacimiento (el gate de P42 lo midió en el producto,
+   a 360 y 1280: left/right idénticos, jump=0.00).
+
+   EL AIRE SE PAGA UNA VEZ (P49 D1; la queja de la tienda: el hueco
+   « horrible » entre un input y el siguiente). El asiento de la palabra y
+   el margen de Fomantic se apilaban — 23.8px + 14px = 37.8px de vacío
+   bajo cada input que puede errar. El margen se va (abajo): la sala
+   queda sola, 23.8px, y la palabra no se mueve ni un píxel (2px bajo el
+   input, a su izquierda, con su aire) ni el botón salta. */
+.ui.form .field.with-room {
+  position: relative;
+  padding-bottom: 1.7rem;
+
+  /* La sala se paga UNA vez (P49 D1; la queja de la tienda: el hueco
+     « horrible » entre un input y el siguiente). Fomantic apila su margen
+     de 1em DEBAJO del asiento, y el campo que puede hablar pagaba el
+     aire dos veces: 23.8px de sala + 14px de margen = 37.8px de nada
+     entre el input y lo que le sigue. Con el margen arriba, la sala
+     queda sola — 23.8px — y la palabra sigue donde estaba (2px bajo el
+     input, a su izquierda, con su aire) y el botón no salta: el
+     asiento se pagó igual, una vez. */
+  margin-bottom: 0;
+}
+
+/* La fila partida que trae una palabra paga su aire como el campo
+   suelto: el margen de la fila (1em) es el segundo aire del caso
+   agrupado y se va cuando la fila carga la sala. La fila EN LÍNEA
+   (el descuento del catálogo) queda fuera: su campo no trae la sala
+   —el atajo de Fomantic (`padding: 0 1em 0 0`) le gana— y su margen
+   es hoy el aire de su palabra; moverlo sería cambiar otra cosa
+   (D2). `:has()` da la fila: no hay pseudo-clase que elija al padre
+   desde el hijo, y la casa ya usa `:has` en su propio Fomantic. */
+.ui.form .fields:not(.inline):has(> .field.with-room) {
+  margin-bottom: 0;
+}
+
+/* En la casa estrecha (≤767px) Fomantic APILA las filas y les devuelve a
+   cada campo su margen de 1em — la misma fila, pero con un aire encima del
+   que la casa ya pagó. La regla repite la de Fomantic (sus dos
+   `:not(.unstackable)` y el hijo directo) y le añade la sala:
+   especificidad estrictamente mayor, nunca por orden de hoja (P36 D1). La
+   fila EN LÍNEA queda fuera (D2): su campo no trae la sala y su margen es
+   el aire de su palabra. */
+.ui.form:not(.unstackable) .fields:not(.unstackable):not(.inline) > .field.with-room {
+  margin-bottom: 0;
+}
+
+.ui.form .field.with-room .xtrim-error {
+  display: block;
+  height: 0;               /* en flujo para nacer donde nace el input; el asiento ya se pagó */
+  overflow: visible;
+  transform: translateY(2px); /* el aire de 2px es pintura, no layout: el botón no se mueve */
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--xtrim-red, #9f3a38);
+}
+
+/* Dentro de una fila partida (P41) el campo carga el gutter de Fomantic
+   (`padding: 0 0.5em` en `.ui.form .fields > .field`): la palabra absoluta
+   no puede sentarse en `left: 0` — caería medio em a la izquierda del input,
+   porque el ancla es el padding-box del campo y el input arranca en su
+   content-box. La palabra se sienta donde se sienta el input. Vence por
+   especificidad estrictamente mayor (P36 D1), nunca por orden de hoja. */
+.ui.form .fields > .field.with-room .xtrim-error {
+  left: 0.5em;
+  right: 0.5em;
+}
+
+/* The red is earned (P38, the lesson the pass hands to P39–P47): Fomantic
+   2.9 paints every `input:invalid` the moment the native `required`
+   attribute exists — a pristine field is born painted before a single
+   touch. The house refuses the verdict that nobody asked for: the input
+   stays quiet until the form itself flags it (`xtrim-flagged`, bound to
+   the same touched-or-attempted condition that governs the words — wears
+   Fomantic's own refusal colours. Both overrides win by strictly greater
+   specificity than Fomantic's original, never by tie order (P36 D1). */
+.ui.form:not(.initial) .field input:invalid:not(.xtrim-flagged) {
+  color: inherit;
+  background: #fff;
+  border-color: rgba(34, 36, 38, 0.15);
+  box-shadow: none;
+}
+
+.ui.form:not(.initial) .field .xtrim-flagged:invalid {
+  color: #9f3a38;
+  background: #fff6f6;
+  border-color: #e0b4b4;
+  box-shadow: none;
+}
+
+/* La llegada sin veredicto nativo (P43 D7): un identificador de -3 no
+   debe paso a `:invalid` del navegador (sin required, sin min) — Fomantic
+   calla su pintura exactamente donde el schema de la casa habló, y las
+   palabras quedarían solas: rojo en la palabra, blanco en el input, una
+   incoherencia que el gate midió (-3 sin pintar, 2.5 pintado). La bandera
+   ES la frase — vive atada a tocada-o-intentada Y inválida — así que lo
+   que la lleva viste la negación, nativa o no. Las dos reglas de P38
+   guardan su letra; la tercera sostiene la casa. */
+.ui.form:not(.initial) .field input.xtrim-flagged.xtrim-flagged {
+  color: #9f3a38;
+  background: #fff6f6;
+  border-color: #e0b4b4;
+  box-shadow: none;
+}
+
+/* The charged total (P30): the one number the server stamped. The estimate of
+   the cart and the summary stays in Pizarra (arithmetic); the charged truth
+   wears the ink of Verde Precio — 700, tabular, the conclusion of a receipt. */
+.xtrim-total {
+  color: var(--xtrim-price-ink);
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- The grid of the categories -------------------------------------------- */
+/* The count of a category card is a meta in Etiqueta — the word says ítem or
+   ítems, the colour never pill-shouts it (P26 D2). The whole card keeps the
+   hover voice Fomantic gives it; no extra decoration earns its place. */
+.xtrim-category-card__count {
+  color: var(--xtrim-label);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+
+/* --- The gallery of the detail ------------------------------------------- */
+/* The main box composes in its declared ratio (the 800×600 of the source):
+   landscape on every width, never the 600px portrait monolith over the
+   fold. Without an image the same ratio reserves the box — the look never
+   moves (HU-30). */
+.xtrim-gallery-main {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  border-radius: 0.28571429rem;
+  background: var(--xtrim-canvas);
+  object-fit: cover;
+}
+
+/* Sin imagen, la clase `xtrim-gallery-main--empty` marca el estado y el lienzo
+   del sistema reserva la misma caja; el relleno lo da la regla base. */
+
+/* The thumbnails are buttons (P25): the keyboard reaches the gallery, like
+   the pager. The word is on the button, the image is decorative; the
+   selected state signals in Azul Señal and the cursor's border is a
+   response, not decoration. */
+.xtrim-gallery-thumb {
+  display: inline-block;
+  padding: 0;
+  line-height: 0;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 0.28571429rem;
+  cursor: pointer;
+}
+
+.xtrim-gallery-thumb img {
+  display: block;
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 0.28571429rem;
+}
+
+.xtrim-gallery-thumb:hover {
+  border-color: var(--xtrim-border);
+}
+
+.xtrim-gallery-thumb.is-selected {
+  border-color: var(--xtrim-primary);
+}
+
+.xtrim-gallery-thumb.is-selected:hover {
+  border-color: var(--xtrim-primary);
+}
+
+/* --- The specification table ---------------------------------------------- */
+.xtrim-specs {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.xtrim-specs th,
+.xtrim-specs td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--xtrim-border);
+  text-align: left;
+}
+
+.xtrim-specs th {
+  width: 40%;
+  color: var(--xtrim-label);
+  font-weight: 700;
+}
+
+/* --- The small screens ---------------------------------------------------- */
+@media (max-width: 767px) {
+  .ui.menu > .ui.container {
+    flex-wrap: wrap;
+  }
+
+  .ui.menu .right.menu {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .ui.grid > .xtrim-column {
+    width: 100% !important;
+    margin: 0 0 1rem !important;
+  }
+}
+
+
+/* --- The CRM --------------------------------------------------------------- */
+/* The status legend of the CRM (P32 D2): the chips keep the convention they
+   arrived with — Nuevo (Fomantic blue), En gestión / Ganado (green), Cerrado
+   (grey), Perdido (red) — as the reified vocabulary of the state machine.
+   The word carries the information first; the colour is redundant velocity,
+   confined to the CRM, and never grows without a decision recorded in P32's
+   spec (PRODUCT.md principle 1: the conflict is surfaced, not solved). */
+
+/* The money inside the CRM is money's: the Monto column, a board column's
+   total, the money statistics and the orders' totals read in the ink of
+   Verde Precio — the legend's green is a different, recorded job (P32 D2). */
+.xtrim-crm-money {
+  color: var(--xtrim-price-ink);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The six numbers of the panel (P32 D5): the Display tier's weight, tabular
+   digits, no Fomantic statistic roundness on top. */
+.xtrim-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.xtrim-kpi__value {
+  color: var(--xtrim-ink);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.xtrim-kpi__value.is-money {
+  color: var(--xtrim-price-ink);
+}
+
+.xtrim-kpi__label {
+  color: var(--xtrim-label);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.xtrim-filters {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+/* Los campos de los filtros van rasantes (P36): Fomantic da a .ui.form .field
+   un margen inferior de 1em, y el empate de la misma especificidad lo deja
+   ganar — el botón Aplicar quedaba 1em por debajo de la línea de los
+   controles. El override de la casa nace aquí con una especificidad que no
+   puede perder, y midiendo el render (P36 D1). */
+.ui.form.xtrim-filters > .field {
+  margin: 0;
+  min-width: 11rem;
+}
+
+/* La palabra en la fila rasante (P43 D6): el campo que puede errar no paga
+   el hueco en su propia caja — el asiento global `with-room` lo levantaría
+   1.4rem sobre la línea de los inputs que P36 midió (fields bottom ==
+   Aplicar bottom). El campo mantiene su altura natural y la palabra vive
+   absoluta bajo él, en el hueco que la propia fila ya paga con su margen
+   de 1.5rem: ninguna línea, ningún botón, ninguna tabla se mueve. */
+.ui.form.xtrim-filters > .field {
+  position: relative;
+}
+
+.ui.form.xtrim-filters > .field .xtrim-error {
+  position: absolute;
+  top: calc(100% + 0.15rem);
+  left: 0;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  color: var(--xtrim-red, #9f3a38);
+  white-space: nowrap;
+}
+
+/* Apilada la fila (la casa estrecha), el hueco bajo la fila ya no es de
+   nadie: cada campo paga su propio asiento — el margen que P36 raspó
+   vuelve solo en esa anchura, y la fila cede el suyo para que el ritmo
+   bajo la fila no cambie. Ambas reglas vencen por especificidad
+   estrictamente mayor (`.field.field` sobre el rasp de P36; el breaker
+   mecánico del gate), nunca por orden de hoja. El límite de 899 px es el
+   envolvimiento de la fila, medido en el gate (P43 validation.md). */
+@media (max-width: 899px) {
+  .ui.form.xtrim-filters {
+    margin-bottom: 0;
+  }
+
+  .ui.form.xtrim-filters > .field.field {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.xtrim-count {
+  color: var(--xtrim-label);
+}
+
+.xtrim-muted {
+  color: var(--xtrim-muted);
+  font-size: 0.85rem;
+}
+
+.xtrim-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.xtrim-timeline__entry {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+  border-left: 1px solid var(--xtrim-border);
+  padding-left: 0.75rem;
+  margin-left: 0.35rem;
+}
+
+/* The history of the lead (P35 D4): the operations of the timeline as their
+   own instrument — the chip row of the filter, the icon bubbles on a rail,
+   and the collapsible bodies of the recorded details. Presentation only:
+   every detail it shows was already recorded (P35 D3). */
+.xtrim-history {
+  position: relative;
+  margin-top: 1rem;
+}
+
+.xtrim-history::before {
+  content: '';
+  position: absolute;
+  left: 1.1rem;
+  top: 0.75rem;
+  bottom: 0.75rem;
+  width: 1px;
+  background: var(--xtrim-border);
+}
+
+.xtrim-history__entry {
+  position: relative;
+}
+
+.xtrim-history__head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.4rem 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.xtrim-history__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  border: 1px solid var(--xtrim-border);
+  background: #ffffff;
+  color: var(--xtrim-muted);
+}
+
+.xtrim-history__icon .icon {
+  margin: 0;
+  height: auto;
+  font-size: 0.95rem;
+}
+
+.xtrim-history__icon.is-tone-blue   { color: var(--xtrim-tone-blue); }
+.xtrim-history__icon.is-tone-green  { color: var(--xtrim-tone-green); }
+.xtrim-history__icon.is-tone-red    { color: var(--xtrim-tone-red); }
+.xtrim-history__icon.is-tone-yellow { color: var(--xtrim-tone-yellow); }
+.xtrim-history__icon.is-tone-orange { color: var(--xtrim-tone-orange); }
+.xtrim-history__icon.is-tone-grey   { color: var(--xtrim-tone-grey); }
+.xtrim-history__icon.is-tone-money  { color: var(--xtrim-tone-money); }
+
+.xtrim-history__summary {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.xtrim-history__summary strong {
+  color: var(--xtrim-ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.xtrim-history__when {
+  color: var(--xtrim-muted);
+  font-size: 0.8rem;
+}
+
+.xtrim-history__caret {
+  flex: none;
+  color: var(--xtrim-muted);
+  margin: 0;
+  height: auto;
+  transition: transform 120ms ease;
+}
+
+.xtrim-history__entry.is-open .xtrim-history__caret {
+  transform: rotate(180deg);
+}
+
+.xtrim-history__body {
+  margin: 0.1rem 0 0.75rem 3rem;
+  padding: 0.65rem 0.85rem;
+  border-left: 2px solid var(--xtrim-border);
+  border-radius: 0.28571429rem;
+  background: var(--xtrim-canvas);
+}
+
+.xtrim-history__meta {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem 1rem;
+}
+
+.xtrim-history__meta-row {
+  display: contents;
+}
+
+.xtrim-history__meta dt {
+  color: var(--xtrim-label);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.xtrim-history__meta dd {
+  margin: 0;
+  color: var(--xtrim-ink);
+  overflow-wrap: anywhere;
+}
+
+.xtrim-history__filters {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.xtrim-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--xtrim-border);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--xtrim-ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.xtrim-filter-chip:hover {
+  border-color: var(--xtrim-primary);
+}
+
+.xtrim-filter-chip.is-active {
+  border-color: var(--xtrim-primary);
+  background: #e8f5ff;
+  color: var(--xtrim-primary);
+}
+
+.xtrim-filter-chip__count {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 0 0.35em;
+  border-radius: 999px;
+  background: var(--xtrim-canvas);
+  color: var(--xtrim-label);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.xtrim-filter-chip.is-active .xtrim-filter-chip__count {
+  background: rgba(33, 133, 208, 0.14);
+  color: var(--xtrim-primary);
+}
+
+.xtrim-filter-chip--clear {
+  border-style: dashed;
+  color: var(--xtrim-label);
+}
+
+.xtrim-filter-chip--clear .icon {
+  margin: 0;
+  height: auto;
+}
+
+.xtrim-filter-chip--clear:hover {
+  border-color: var(--xtrim-tone-red);
+  color: var(--xtrim-tone-red);
+}
+
+.xtrim-history__head:focus-visible,
+.xtrim-filter-chip:focus-visible {
+  outline: 2px solid var(--xtrim-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xtrim-history__caret {
+    transition: none;
+  }
+}
+
+.xtrim-note {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--xtrim-border);
+  border-radius: 0.28571429rem;
+  margin: 0.5rem 0;
+  background: #ffffff;
+}
+
+/* The note of the house (P27): the note's heading speaks Etiqueta. */
+.xtrim-note__label {
+  color: var(--xtrim-label);
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.enter-animation {
+  animation: slide-fade 2s;
+}
+@keyframes slide-fade {
+  from {
+    opacity: 0;
+
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.leave-animation {
+  animation: leave-slide-fade 0.5s;
+}
+@keyframes leave-slide-fade {
+
+  to {
+    opacity: 0;
+   
+  }
+}
+
+/* The room the panel's route renders into. It keeps a floor while the
+   arriving screen loads: without it the room collapsed to a one-bar sliver,
+   the footer climbed into view, and then dropped again when the table
+   arrived — the abrupt transition. The floor holds the footer below the
+   fold for the whole passage. */
+.xtrim-admin__content {
+  min-height: 60vh;
+}
+
+/* The arriving screen fades in quietly, so the passage between the panel's
+   tabs reads as one surface changing its mind, not as a hard cut. The fade
+   lives here — not in `admin.scss` — because the router inserts the host
+   element of the arriving component outside the panel's own template, and
+   the emulated encapsulation of the component would never let `> *` reach
+   it. */
+.xtrim-admin__content > * {
+  animation: xtrim-admin-fade 0.2s ease-out;
+}
+
+@keyframes xtrim-admin-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* The movement is a courtesy, never a demand: the visitor who asks for less
+   motion gets none — the room appears at once. */
+@media (prefers-reduced-motion: reduce) {
+  .xtrim-admin__content > * {
+    animation: none;
+  }
+}

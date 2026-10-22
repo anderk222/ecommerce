@@ -1,0 +1,60 @@
+@if (outOfStock()) {
+<!-- El tramo del aviso (P17), extraído de detail como su propia superficie
+       (P31 D2): el markup es el que era, letra por letra, salvo la caja —
+       dentro del card de la ficha la frontera la pone él; el panel del aviso
+       vive en lienzo, sin borde propio (enmienda del cliente). -->
+<div class="xtrim-detail__notify">
+  <h2 class="ui header">Notificarme cuando exista stock</h2>
+
+  @if (notifyMessage(); as text) {
+  <!-- La voz del mensaje del sistema (P26–P30): las palabras de P17
+           verbatim; la negación lleva la exclamación, la promesa la palomita. -->
+  <div class="xtrim-message" [class.is-error]="notifyFailed()" aria-live="polite"
+    animate.enter="xtrim-message--enter"
+    animate.leave="xtrim-message--leave"
+  >
+    @if (notifyFailed()) {
+    <i class="exclamation circle icon" aria-hidden="true"></i>
+    } @else {
+    <i class="check circle outline icon" aria-hidden="true"></i>
+    }
+    <span>{{ text }}</span>
+  </div>
+  }
+
+  <form class="ui form" novalidate (submit)="subscribeToStock($event)">
+    <div class="two fields">
+      <div class="field">
+        <label for="notify-name" class="xtrim-required">Nombre</label>
+        <input id="notify-name" type="text" [formField]="notifyForm.name" />
+      </div>
+      <div class="field">
+        <label for="notify-email" class="xtrim-required">Correo</label>
+        <input id="notify-email" type="email" [formField]="notifyForm.email" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="notify-province">Provincia</label>
+      <select id="notify-province" [formField]="notifyForm.province">
+        @for (option of provinces; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="inline field">
+      <div class="ui checkbox">
+        <input id="notify-consent" type="checkbox" [formField]="notifyForm.consent" />
+        <label for="notify-consent" class="xtrim-required">Acepto que me contacten</label>
+      </div>
+    </div>
+
+    <!-- La promesa es la única acción viva de la pantalla (P31 D3): el
+           primary del segmento, callado hasta que el consent lo respalda. -->
+    <button class="ui primary button" type="submit" [disabled]="consent">
+      Avisarme
+    </button>
+  </form>
+</div>
+}

@@ -1,0 +1,73 @@
+@startuml
+!theme plain
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 13
+skinparam nodesep 25
+skinparam ranksep 35
+skinparam ArrowColor #4A5568
+skinparam ComponentBackgroundColor #FFFFFF
+skinparam ComponentBorderColor #2D3748
+skinparam PackageBackgroundColor #F7FAFC
+skinparam PackageBorderColor #A0AEC0
+
+title Xtrim — diagrama de componentes
+
+actor "Visitante\n(sin registro)" as V
+actor "Administrador" as A
+
+package "Frontend · navegador (Angular 22)" as FE {
+  component "Tienda pública\nHome · Listados · Detalle\nCategorías · Carrito · Checkout · Contacto" as SHOP
+  component "Panel /admin\nCatálogo · Categorías\nCRM · Tablero · Indicadores" as ADMIN
+  component "Núcleo\nAuth · CartStore · Tracker\nStoragePort · SEO" as CORE
+}
+
+package "Servidor Node\n(SSR y proxy)" as NODE {
+  component "Express\nSSR · /api · sitemap.xml · robots.txt" as SSR
+}
+
+package "Backend · Spring Boot 4 (hexagonal)" as BE {
+  component "API REST\n/api/public · /api/auth · /api/admin" as API
+
+  package "Hexágonos" as HEX {
+    component "catalog\ncatálogo · ofertas\ncategorías · stock" as CAT
+    component "order\ncompra simulada" as ORD
+    component "tracking\nactividad anónima" as TRK
+    component "lead\nCRM · pipeline · KPI" as LEAD
+    component "auth\nlogin JWT" as AUTH
+  }
+}
+
+database "PostgreSQL 17\n(Flyway)" as DB
+queue "Redis\ncaché 5 min" as REDIS
+
+V --> SHOP : navega
+A --> ADMIN : gestiona
+SHOP --> SSR : HTTPS · /api
+ADMIN --> SSR
+SHOP ..> CORE : usa
+ADMIN ..> CORE : usa
+SSR --> API : JSON
+SSR ..> API : render + sitemap
+
+API --> CAT
+API --> ORD
+API --> TRK
+API --> LEAD
+API --> AUTH
+
+ORD --> CAT : precio y stock
+ORD --> LEAD : compra → lead
+TRK --> LEAD : vincula al visitante
+
+CAT --> DB
+ORD --> DB
+TRK --> DB
+LEAD --> DB
+AUTH --> DB
+CAT --> REDIS
+
+
+
+@enduml

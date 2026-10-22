@@ -1,0 +1,68 @@
+# ============================================================================
+# Xtrim — Ecommerce + CRM de Leads
+# One repository, two deployables (backend/, frontend/).
+# ============================================================================
+
+### Backend (Maven) ###
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### Frontend (Angular / npm) ###
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.nx/
+frontend/.cache/
+frontend/.vitest/
+frontend/coverage/
+# The stylesheet of Fomantic, pruned by the build (scripts/purge-css.mjs).
+frontend/generated/
+
+### Local environment — never committed ###
+.env
+.env.*
+!.env.example
+*.local
+
+### OS / editor ###
+.DS_Store
+Thumbs.db
+HELP.md
+
+# The temporary profile of the browser that Lighthouse creates. On a machine
+# without a usable TMPDIR it lands in the working directory. Only directories
+# are ignored, so `scripts/lighthouse.sh` stays tracked.
+.lighthouse/
+lighthouse/
+lighthouse.*/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+.logs/

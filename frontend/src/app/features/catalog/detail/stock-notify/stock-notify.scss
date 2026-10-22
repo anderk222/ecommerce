@@ -1,0 +1,21 @@
+/* The host is the block the composer orders on mobile: the detail keeps the
+   `xtrim-detail__notify` order rule working through the host's own class.
+   Inside the sheet's card the ask is a canvas panel, not a bordered segment —
+   the frontier belongs to the card, the surface to the system (the same voice
+   as the buy panel and the lead history body). */
+:host {
+  display: block;
+}
+
+.xtrim-detail__notify {
+  /* The promise breathes: the heading and the form keep one rhythm, and the
+     message zone reserves its line so the answer never shoves the form. */
+  margin-top: 1.5rem;
+  background: var(--xtrim-canvas);
+  border-radius: 0.28571429rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.xtrim-detail__notify .xtrim-message {
+  margin-bottom: 0.75rem;
+}

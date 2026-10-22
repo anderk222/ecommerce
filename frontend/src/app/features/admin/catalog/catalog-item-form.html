@@ -1,0 +1,160 @@
+<div class="ui container">
+  <h2 class="ui header">
+    {{ editingId() === null ? 'Nuevo ítem' : 'Editar ítem' }}
+  </h2>
+
+  @if (message() ?? readError(); as text) {
+    <!-- La voz de la conversación (P39): el mensaje general del submit
+         invalidado y la palabra del servidor — la de arriba, tal y como
+         llegó (P26: el pase levanta la voz, nunca las palabras). La
+         negativa de la lectura habla aquí también (P51 D4): una sola caja
+         por pantalla. -->
+    <div class="xtrim-message" [class.is-error]="failed() || readError() !== null"
+      [attr.role]="failed() || readError() !== null ? 'alert' : 'status'"
+      animate.enter="xtrim-message--enter"
+      animate.leave="xtrim-message--leave"
+    >
+      @if (failed() || readError() !== null) {
+        <i class="exclamation circle icon" aria-hidden="true"></i>
+      } @else {
+        <i class="check circle outline icon" aria-hidden="true"></i>
+      }
+      <span>{{ text }}</span>
+    </div>
+  }
+
+  <form class="ui form" novalidate (submit)="save($event)">
+    <div class="two fields">
+      <div class="field">
+        <!-- La marca del validator: el asterisco es un hecho (P28 D4). -->
+        <label for="item-type" class="xtrim-required">Tipo</label>
+        <select id="item-type" [formField]="itemForm.type">
+          <option value="PRODUCT">Producto</option>
+          <option value="SERVICE">Servicio</option>
+        </select>
+      </div>
+      <div class="field with-room">
+        <label for="item-name" class="xtrim-required">Nombre</label>
+        <input
+          id="item-name"
+          type="text"
+          placeholder="Router WiFi 6"
+          [formField]="itemForm.name"
+          [class.xtrim-flagged]="(itemForm.name().touched() || attempted()) && itemForm.name().invalid()"
+          [attr.aria-invalid]="(itemForm.name().touched() || attempted()) && itemForm.name().invalid() ? 'true' : null"
+          aria-describedby="item-name-error"
+        />
+        @if ((itemForm.name().touched() || attempted()) && itemForm.name().invalid()) {
+          <!-- La palabra del contrato, bajo el input que la pide: visible solo
+               tocada-inválida o tras un intento (P39). -->
+          <small class="xtrim-error" id="item-name-error">{{ itemForm.name().errors()[0].message }}</small>
+        }
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="item-description">Descripción</label>
+      <textarea id="item-description" [formField]="itemForm.description" rows="4"></textarea>
+    </div>
+
+    <div class="two fields">
+      <div class="field with-room">
+        <label for="item-price" class="xtrim-required">Precio (USD)</label>
+        <input
+          id="item-price"
+          type="number"
+          step="0.01"
+          [formField]="itemForm.price"
+          [class.xtrim-flagged]="(itemForm.price().touched() || attempted()) && itemForm.price().invalid()"
+          [attr.aria-invalid]="(itemForm.price().touched() || attempted()) && itemForm.price().invalid() ? 'true' : null"
+          aria-describedby="item-price-error"
+        />
+        @if ((itemForm.price().touched() || attempted()) && itemForm.price().invalid()) {
+          <small class="xtrim-error" id="item-price-error">{{ itemForm.price().errors()[0].message }}</small>
+        }
+      </div>
+      <div class="field with-room">
+        <label for="item-stock">Stock (vacío = no se controla)</label>
+        <input
+          id="item-stock"
+          type="number"
+          [formField]="itemForm.stock"
+          [class.xtrim-flagged]="(itemForm.stock().touched() || attempted()) && itemForm.stock().invalid()"
+          [attr.aria-invalid]="(itemForm.stock().touched() || attempted()) && itemForm.stock().invalid() ? 'true' : null"
+          aria-describedby="item-stock-error"
+        />
+        @if ((itemForm.stock().touched() || attempted()) && itemForm.stock().invalid()) {
+          <small class="xtrim-error" id="item-stock-error">{{ itemForm.stock().errors()[0].message }}</small>
+        }
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="item-images">Imágenes (una URL por línea)</label>
+      <textarea id="item-images" [formField]="itemForm.imagesText" rows="3"></textarea>
+    </div>
+
+    <div class="field">
+      <label>Especificaciones</label>
+      @for (row of specifications(); track $index) {
+        <div class="fields xtrim-spec-row">
+          <div class="field">
+            <input
+              type="text"
+              placeholder="Clave"
+              [value]="row.name"
+              (input)="updateSpecification($index, 'name', valueOf($event))"
+            />
+          </div>
+          <div class="field">
+            <input
+              type="text"
+              placeholder="Valor"
+              [value]="row.value"
+              (input)="updateSpecification($index, 'value', valueOf($event))"
+            />
+          </div>
+          <div class="field">
+            <button class="ui red button" type="button" (click)="removeSpecification($index)">
+              Quitar
+            </button>
+          </div>
+        </div>
+      }
+      <button class="ui button" type="button" (click)="addSpecification()">
+        Agregar especificación
+      </button>
+    </div>
+
+    <div class="field">
+      <label>Categorías</label>
+      <div class="ui selection xtrim-form-categorias">
+        @if (categories.hasValue()) {
+          @for (category of categories.value(); track category.id) {
+            <div
+              class="ui label"
+              [class.xtrim-selected]="selectedCategories().includes(category.id)"
+              (click)="toggleCategory(category.id)"
+            >
+              {{ category.name }}
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    <div class="inline field">
+      <div class="ui checkbox">
+        <input id="item-featured" type="checkbox" [formField]="itemForm.featured" />
+        <label for="item-featured">Destacado</label>
+      </div>
+    </div>
+
+    <div class="ui buttons">
+      <button class="ui primary button" type="submit" [disabled]="busy()">
+        {{ busy() ? 'Guardando…' : 'Guardar' }}
+      </button>
+      <a class="ui button" routerLink="/admin/catalog">Cancelar</a>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,72 @@
+.xtrim-listing__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.xtrim-listing__header .ui.header {
+  margin-bottom: 0.25rem;
+}
+
+.xtrim-listing__count {
+  color: var(--xtrim-label);
+  margin: 0;
+}
+
+.xtrim-listing__search {
+  min-width: 18rem;
+  flex: 1 1 18rem;
+}
+
+.xtrim-listing__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* The offers-only toggle earns its state without colour alone: pressed, it
+   takes the canvas and the line of Azul Señal. */
+.xtrim-listing__filters .ui.labeled.filter.button.active {
+  background: var(--xtrim-canvas);
+  border-color: var(--xtrim-primary);
+}
+
+/* The sort control is a native <select> (HU-30): it works without
+   JavaScript, it is what a phone expects, and it lets the project drop
+   jQuery and the JavaScript of Fomantic from every page. */
+.xtrim-listing__sort {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.xtrim-listing__sort .text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--xtrim-label);
+}
+
+.xtrim-listing__sort select.ui.dropdown {
+  min-width: 12rem;
+  height: auto;
+  font-family: inherit;
+  font-size: 1rem;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.xtrim-listing__empty {
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 767px) {
+  .xtrim-listing__header {
+    align-items: stretch;
+  }
+}

@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "app.cors.allowed-origins",
+    "type": "java.lang.String",
+    "description": "origin allowed to to request to the server(cors)"
+  },
+  {
+    "name": "app.security.jwt-secret",
+    "type": "java.lang.String",
+    "description": "Secret key for jwt token"
+  },
+  {
+    "name": "app.security.jwt-ttl",
+    "type": "java.lang.String",
+    "description": "Tiempo de vida de token jwt'"
+  }
+]}

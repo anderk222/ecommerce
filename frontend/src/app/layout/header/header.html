@@ -1,0 +1,41 @@
+<header class="ui borderless attached menu" #header>
+  <div class="ui container">
+    <a class="item" routerLink="/" aria-label="Inicio">
+      <strong class="xtrim-logo">Xtrim</strong>
+    </a>
+
+    <a class="item" routerLink="/productos" routerLinkActive="active">Productos</a>
+    <a class="item" routerLink="/servicios" routerLinkActive="active">Servicios</a>
+    <a class="item" routerLink="/categorias" routerLinkActive="active">Categorías</a>
+
+    <div class="right menu">
+      <form class="item" (ngSubmit)="search()">
+        <div class="ui icon input">
+          <input
+            type="search"
+            name="q"
+            placeholder="Buscar productos y servicios"
+            aria-label="Buscar"
+            [ngModel]="query()"
+            (ngModelChange)="query.set($event)"
+          />
+          <i class="search icon"></i>
+        </div>
+      </form>
+
+      <a class="item xtrim-cart" routerLink="/carrito" [attr.aria-label]="cartLabel()">
+        <i class="shopping cart icon" aria-hidden="true"></i>
+        @if (cart.count() > 0) {
+          <!-- Cuántos items hay, a la vista; lo que se debe, al detalle: el
+               número es la forma quieto, el dinero viaja al hover. -->
+          <span class="xtrim-cart__count">{{ cart.count() }}</span>
+          <div class="xtrim-cart__menu" aria-hidden="true">
+            <span class="xtrim-cart__menu-label">Valor a pagar</span>
+            <span class="xtrim-cart__menu-total">${{ cart.total().toFixed(2) }}</span>
+            <span class="xtrim-cart__menu-units">{{ unitsLabel() }}</span>
+          </div>
+        }
+      </a>
+    </div>
+  </div>
+</header>

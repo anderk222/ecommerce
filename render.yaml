@@ -1,0 +1,88 @@
+# ============================================================================
+# Xtrim — the deployment on Render
+#
+# Four pieces: the site (Docker + Node SSR), the API (Docker + Spring Boot),
+# a managed PostgreSQL and a Key Value instance (the cache). The secrets are
+# NOT here: Render generates JWT_SECRET and injects the database credentials.
+#
+# Two details that break a deploy when they are ignored:
+#   - Postgres goes in the top-level `databases` list, never in `services`,
+#     and its properties are read with `fromDatabase`.
+#   - Render's `host` has no scheme, so the URL variables are built from
+#     RENDER_EXTERNAL_URL. The site completes PUBLIC_API_URL with `/api`
+#     (src/app/core/api/public-api-url.server.ts).
+#
+# Plans are `free` for a demo. A free web service sleeps after 15 minutes
+# without traffic (the next request takes ~1 minute) and a free PostgreSQL
+# expires 30 days after creation. Change `plan` to `1c-2g` (web) or a paid
+# database plan to remove those limits.
+# ============================================================================
+
+services:
+  - type: web
+    name: xtrim-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/health
+    envVars:
+      # The JDBC URL is composed by Spring from these parts: Render's
+      # connectionString is `postgresql://…`, without the `jdbc:` prefix.
+      - key: SPRING_DATASOURCE_HOST
+        fromDatabase: { name: xtrim-db, property: host }
+      - key: SPRING_DATASOURCE_PORT
+        fromDatabase: { name: xtrim-db, property: port }
+      - key: SPRING_DATASOURCE_DB
+        fromDatabase: { name: xtrim-db, property: database }
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase: { name: xtrim-db, property: user }
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase: { name: xtrim-db, property: password }
+      - key: REDIS_HOST
+        fromService: { type: keyvalue, name: xtrim-redis, property: host }
+      - key: REDIS_PORT
+        fromService: { type: keyvalue, name: xtrim-redis, property: port }
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_TTL
+        value: 3600
+      # Render routes to PORT (10000 by default); the API keeps 8080.
+      - key: PORT
+        value: 8080
+      # The browser calls the API through the site's /api proxy, so CORS is a
+      # safety net for direct calls. An origin always carries its scheme.
+      - key: CORS_ALLOWED_ORIGINS
+        fromService: { type: web, name: xtrim-site, envVarKey: RENDER_EXTERNAL_URL }
+
+  - type: web
+    name: xtrim-site
+    runtime: docker
+    plan: free
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    # robots.txt proves the Node server is alive without depending on the API.
+    healthCheckPath: /robots.txt
+    envVars:
+      # Absolute URL of the API. The site appends /api when it is missing.
+      - key: PUBLIC_API_URL
+        fromService: { type: web, name: xtrim-api, envVarKey: RENDER_EXTERNAL_URL }
+      # Public URL of the site: canonical links, Open Graph and the sitemap.
+      - key: SITE_BASE_URL
+        fromService: { type: web, name: xtrim-site, envVarKey: RENDER_EXTERNAL_URL }
+      # Angular's SSRF guard expects hostnames: no scheme, no port.
+      - key: NG_ALLOWED_HOSTS
+        fromService: { type: web, name: xtrim-site, envVarKey: RENDER_EXTERNAL_HOSTNAME }
+
+  # Key Value (the cache). It is a service, not a Postgres database.
+  - type: keyvalue
+    name: xtrim-redis
+    plan: free
+    ipAllowList: []
+
+databases:
+  - name: xtrim-db
+    plan: free
+    postgresMajorVersion: '17'
+    databaseName: xtrim
+    user: xtrim

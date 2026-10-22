@@ -1,0 +1,124 @@
+<div class="ui container">
+  <!-- La página no lleva un título visible por diseño (el mostrador abre con la
+       voz de la tienda), pero la estructura necesita su h1: para el lector de
+       pantallas y para el crawler. -->
+  <h1 class="xtrim-sr-only">Xtrim — productos y servicios en un solo catálogo</h1>
+  @if (content.hasValue()) {
+    @let home = content.value();
+    <!-- 1. Lo que la tienda quiere vender: el carrusel de los destacados. -->
+    @if (home.featured.length) {
+      <app-carousel [items]="home.featured" />
+    }
+
+    <!-- 2. Los servicios. -->
+    @if (home.services.length) {
+      <section class="xtrim-section">
+        <div class="xtrim-section__header">
+          <h2 class="ui header">
+            <i class="wrench icon"></i> Servicios
+          </h2>
+          <a class="ui small basic button" routerLink="/servicios">Ver todos</a>
+        </div>
+
+        <div class="ui stackable grid">
+          @for (item of home.services; track item.id) {
+            <div class="four wide column xtrim-column">
+              <app-item-card [item]="item" />
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- 3. Los productos. -->
+    @if (home.products.length) {
+      <section class="xtrim-section">
+        <div class="xtrim-section__header">
+          <h2 class="ui header">
+            <i class="box icon"></i> Productos
+          </h2>
+          <a class="ui small basic button" routerLink="/productos">Ver todos</a>
+        </div>
+
+        <div class="ui stackable grid">
+          @for (item of home.products; track item.id) {
+            <div class="four wide column xtrim-column">
+              <app-item-card [item]="item" />
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- 4. Las ofertas vigentes. -->
+    @if (home.onSale.length) {
+      <section class="xtrim-section">
+        <div class="xtrim-section__header">
+          <h2 class="ui header">
+            <i class="tag icon"></i> Ofertas vigentes
+          </h2>
+          <a class="ui small basic button" routerLink="/productos?onSale=true">Ver todas</a>
+        </div>
+
+        <div class="ui stackable grid">
+          @for (item of home.onSale; track item.id) {
+            <div class="four wide column xtrim-column">
+              <app-item-card [item]="item" />
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- 5. Los más comprados. -->
+    @if (home.bestSelling.length) {
+      <section class="xtrim-section">
+        <div class="xtrim-section__header">
+          <h2 class="ui header">
+            <i class="star icon"></i> Más comprados
+          </h2>
+          <a class="ui small basic button" routerLink="/productos?sort=best_selling">Ver todos</a>
+        </div>
+
+        <div class="ui stackable grid">
+          @for (item of home.bestSelling; track item.id) {
+            <div class="four wide column xtrim-column">
+              <app-item-card [item]="item" />
+            </div>
+          }
+        </div>
+      </section>
+    }
+  } @else if (content.error()) {
+    <!-- La negativa tiene voz (P51 D3): antes el fallo era un esqueleto eterno.
+         La caja habla con la voz de la casa y deja reintentar. -->
+    <div class="xtrim-message is-error" role="alert"
+      animate.enter="xtrim-message--enter"
+      animate.leave="xtrim-message--leave"
+    >
+      <i class="exclamation circle icon" aria-hidden="true"></i>
+      <span>No pudimos cargar el inicio.</span>
+    </div>
+    <button class="ui button" type="button" (click)="content.reload()">Reintentar</button>
+
+  } @else if (content.isLoading()) {
+    <section class="xtrim-hero">
+      <h1 class="ui header xtrim-hero__title">
+        Productos y servicios, en un solo catálogo
+      </h1>
+      <p class="xtrim-hero__lead">
+        Compra sin registrarte. Tu actividad —lo que buscas, lo que ves, lo que
+        agregas al carrito— queda registrada y llega al equipo comercial como un
+        lead, con todo su historial.
+      </p>
+      <div class="ui buttons">
+        <a class="ui primary button" routerLink="/productos">Ver productos</a>
+        <a class="ui button" routerLink="/servicios">Ver servicios</a>
+      </div>
+    </section>
+
+    <div class="ui segment">
+      <app-loading [lines]="4" label="Cargando el catálogo" />
+    </div>
+  }
+</div>

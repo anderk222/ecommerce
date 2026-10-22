@@ -1,0 +1,41 @@
+@if (totalPages() > 1) {
+  <nav class="xtrim-pager" aria-label="Páginas del catálogo">
+    <div class="ui pagination menu">
+      <button
+        class="item"
+        type="button"
+        [class.is-disabled]="page() === 0"
+        aria-label="Página anterior"
+        (click)="page() > 0 && pageChange.emit(page() - 1)"
+      >
+        <i class="left chevron icon"></i>
+      </button>
+
+      @for (visible of visiblePages(); track visible) {
+        @if (hasGapBefore(visible)) {
+          <div class="disabled item" aria-hidden="true">…</div>
+        }
+        <button
+          class="item"
+          type="button"
+          [class.active]="visible === page()"
+          [attr.aria-current]="visible === page() ? 'page' : null"
+          [attr.aria-label]="'Página ' + (visible + 1)"
+          (click)="pageChange.emit(visible)"
+        >
+          {{ visible + 1 }}
+        </button>
+      }
+
+      <button
+        class="item"
+        type="button"
+        [class.is-disabled]="page() >= totalPages() - 1"
+        aria-label="Página siguiente"
+        (click)="page() < totalPages() - 1 && pageChange.emit(page() + 1)"
+      >
+        <i class="right chevron icon"></i>
+      </button>
+    </div>
+  </nav>
+}

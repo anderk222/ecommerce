@@ -1,0 +1,42 @@
+<footer class="ui vertical footer segment" id="footer">
+  <div class="ui container">
+    <div class="ui stackable grid">
+      <div class="four wide column">
+        <h3 class="ui header">Xtrim</h3>
+        <p>
+          Catálogo unificado de productos y servicios, con carrito, compra
+          simulada y CRM de leads.
+        </p>
+      </div>
+      <div class="four wide column">
+        <h3 class="ui header">Catálogo</h3>
+        <ul class="ui link list">
+          <li><a routerLink="/productos">Productos</a></li>
+          <li><a routerLink="/servicios">Servicios</a></li>
+          <li><a routerLink="/categorias">Categorías</a></li>
+        </ul>
+      </div>
+      <div class="four wide column">
+        <h3 class="ui header">Tienda</h3>
+        <ul class="ui link list">
+          <li><a routerLink="/carrito">Carrito</a></li>
+          <li><a routerLink="/checkout">Finalizar compra</a></li>
+        </ul>
+      </div>
+      <div class="four wide column">
+        <h3 class="ui header">Panel</h3>
+        <ul class="ui link list">
+          <li><a routerLink="/admin">Administración</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ui divider"></div>
+    <div class="xtrim-footer-bottom">
+      <p class="xtrim-copyright">© {{ year }} Xtrim — Ecommerce + CRM de Leads.</p>
+      <a class="ui primary button" routerLink="/contacto">
+        <i class="envelope icon"></i>
+        Contáctenme
+      </a>
+    </div>
+  </div>
+</footer>

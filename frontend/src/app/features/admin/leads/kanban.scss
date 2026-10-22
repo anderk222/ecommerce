@@ -1,0 +1,63 @@
+.xtrim-kanban {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.xtrim-kanban__column {
+  background: var(--xtrim-border);
+  border-radius: 0.28571429rem;
+  padding: 0.75rem;
+  min-height: 12rem;
+  /* The system's motion: an answer arrives fast, never bounces (P32). */
+  transition: background 100ms ease-out;
+}
+
+.xtrim-kanban__column.is-hovered {
+  background: var(--xtrim-canvas-active);
+}
+
+.xtrim-kanban__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.xtrim-kanban__title {
+  font-weight: 700;
+}
+
+.xtrim-kanban__total {
+  color: var(--xtrim-label);
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.xtrim-kanban__total .xtrim-crm-money {
+  font-size: 0.85rem;
+}
+
+.xtrim-kanban__card {
+  cursor: grab;
+  margin-bottom: 0.5rem !important;
+}
+
+.xtrim-kanban__card .header {
+  font-size: 0.95rem;
+}
+
+.xtrim-kanban__empty {
+  color: var(--xtrim-muted);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+@media (max-width: 767px) {
+  .xtrim-kanban {
+    grid-template-columns: 1fr;
+  }
+}

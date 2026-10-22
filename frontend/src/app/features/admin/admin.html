@@ -1,0 +1,43 @@
+<div class="ui container">
+  <div class="xtrim-admin__header">
+    <h1 class="ui header">Administración</h1>
+    @if (user(); as member) {
+      <div class="xtrim-admin__session">
+        <!-- La identidad se dice entera: quién está, qué papel lleva, y qué
+             hace el botón. "Cerrar sesión" — no "Salir" — porque la palabra
+             responde a la pregunta que el visitante no tuvo que hacer (P27 D2). -->
+        <i class="user circle outline big icon xtrim-admin__avatar" aria-hidden="true"></i>
+        <span class="xtrim-admin__name">{{ member.nombre }}</span>
+        <span class="ui tiny label xtrim-chip">{{ member.role }}</span>
+        <button
+          class="ui small basic button xtrim-admin__logout"
+          type="button"
+          (click)="logout()"
+          title="Cerrar la sesión de {{ member.nombre }}"
+          aria-label="Cerrar sesión"
+        >
+          <i class="sign out alternate icon" aria-hidden="true"></i>
+          <span>Cerrar sesión</span>
+        </button>
+      </div>
+    }
+  </div>
+
+  <div class="ui pointing secondary menu xtrim-admin__menu">
+    <a
+      class="item"
+      routerLink="/admin/catalog"
+      routerLinkActive="active"
+    >
+      Catálogo
+    </a>
+    <a class="item" routerLink="/admin/categorias" routerLinkActive="active" >Categorías</a>
+    <a class="item" routerLink="/admin/leads" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Leads</a>
+    <a class="item" routerLink="/admin/leads/tablero" routerLinkActive="active" >Tablero</a>
+    <a class="item" routerLink="/admin/leads/indicadores" routerLinkActive="active">Indicadores</a>
+  </div>
+
+  <div class="xtrim-admin__content">
+    <router-outlet/>
+  </div>
+</div>

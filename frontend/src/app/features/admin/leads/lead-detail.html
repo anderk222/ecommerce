@@ -1,0 +1,216 @@
+<div class="ui segment xtrim-lead-detail">
+  <div class="xtrim-detail-header">
+    <h3 class="ui header">
+      @if (payload(); as item) {
+        {{ item.lead.name }}
+      } @else {
+        Lead
+      }
+    </h3>
+    <button class="ui small button" type="button" (click)="closed.emit()">Cerrar</button>
+  </div>
+
+  @if (message() ?? readError(); as text) {
+    <!-- La negativa de la lectura habla en la caja de la pantalla (P51 D4):
+         una sola voz por pantalla. -->
+    <div class="xtrim-message" [class.is-error]="failed() || readError() !== null"
+      [attr.role]="failed() || readError() !== null ? 'alert' : 'status'"
+      animate.enter="xtrim-message--enter"
+      animate.leave="xtrim-message--leave"
+    >
+      @if (failed() || readError() !== null) {
+        <i class="exclamation circle icon" aria-hidden="true"></i>
+      } @else {
+        <i class="check circle outline icon" aria-hidden="true"></i>
+      }
+      <span>{{ text }}</span>
+    </div>
+  }
+
+  @if (payload(); as item) {
+    <div class="ui stackable grid">
+      <div class="eight wide column">
+        <h4 class="ui header">
+          Línea de tiempo
+          <span class="xtrim-count">
+            {{ filteredTimeline().length }} de {{ item.timeline.length }} eventos
+          </span>
+        </h4>
+
+        @if (item.timeline.length) {
+          <div class="xtrim-history__filters" role="group" aria-label="Filtrar por tipo de operación">
+            @for (type of knownTypes(); track type) {
+              <button
+                class="xtrim-filter-chip"
+                type="button"
+                [class.is-active]="selectedTypes().has(type)"
+                [attr.aria-pressed]="selectedTypes().has(type)"
+                (click)="toggleType(type)"
+              >
+                <span>{{ label(type) }}</span>
+                <span class="xtrim-filter-chip__count">{{ typeCounts()[type] }}</span>
+              </button>
+            }
+            @if (filtering()) {
+              <button class="xtrim-filter-chip xtrim-filter-chip--clear" type="button" (click)="clearFilter()">
+                <i class="x icon" aria-hidden="true"></i>
+                Quitar filtro
+              </button>
+            }
+          </div>
+        }
+
+        @if (item.timeline.length) {
+          <div class="xtrim-history">
+            @for (entry of filteredTimeline(); track $index) {
+              <article class="xtrim-history__entry" [class.is-open]="isOpen($index)">
+                <button
+                  class="xtrim-history__head"
+                  type="button"
+                  [attr.aria-expanded]="isOpen($index)"
+                  [attr.aria-controls]="'entry-' + $index"
+                  (click)="toggleEntry($index)"
+                >
+                  <span class="xtrim-history__icon" [class]="tone(entry)" aria-hidden="true">
+                    @switch (entry.type) {
+                      @case ('SEARCH') {
+                        <i class="search icon"></i>
+                      }
+                      @case ('PRODUCT_VIEW') {
+                        <i class="eye icon"></i>
+                      }
+                      @case ('ADD_TO_CART') {
+                        <i class="cart plus icon"></i>
+                      }
+                      @case ('REMOVE_FROM_CART') {
+                        <i class="cart minus icon"></i>
+                      }
+                      @case ('PURCHASE') {
+                        <i class="shopping bag icon"></i>
+                      }
+                      @case ('STOCK_SUBSCRIBE') {
+                        <i class="bell outline icon"></i>
+                      }
+                      @default {
+                        <i class="tag icon"></i>
+                      }
+                    }
+                  </span>
+                  <span class="xtrim-history__summary">
+                    <strong>{{ summary(entry) }}</strong>
+                    <span class="xtrim-history__when">{{ when(entry) }}</span>
+                  </span>
+                  <i class="chevron down icon xtrim-history__caret" aria-hidden="true"></i>
+                </button>
+                @if (isOpen($index)) {
+                  <div class="xtrim-history__body" [id]="'entry-' + $index">
+                    @if (details(entry).length) {
+                      <dl class="xtrim-history__meta">
+                        @for (row of details(entry); track row.label) {
+                          <div class="xtrim-history__meta-row">
+                            <dt>{{ row.label }}</dt>
+                            <dd>{{ row.value }}</dd>
+                          </div>
+                        }
+                      </dl>
+                    } @else {
+                      <p class="xtrim-muted">Sin más detalles registrados.</p>
+                    }
+                  </div>
+                }
+              </article>
+            }
+          </div>
+        } @else {
+          <p class="xtrim-muted">Este lead todavía no tiene actividad registrada.</p>
+        }
+
+        @if (item.orders.length) {
+          <h4 class="ui header">Pedidos</h4>
+          <table class="ui table xtrim-ledger">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Ítems</th>
+                <th class="right aligned">Total</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (order of item.orders; track order.id) {
+                <tr>
+                  <td>{{ order.id }}</td>
+                  <td>
+                    @for (line of order.items; track $index) {
+                      <div>{{ line.itemName }} × {{ line.quantity }}</div>
+                    }
+                  </td>
+                  <td class="right aligned">
+                    <span class="xtrim-crm-money">${{ order.total.toFixed(2) }}</span>
+                  </td>
+                  <td>{{ order.createdAt }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+
+      <div class="eight wide column">
+        <h4 class="ui header">Notas</h4>
+        <!-- El submit nativo con novalidate: la manera que el pass enseña
+             (P38, heredado); la nota vive en Signal Forms (P46). -->
+        <form class="ui form" novalidate (submit)="submitNote($event)">
+          <div class="field with-room">
+            <!-- La marca del validator: el asterisco es un hecho (P28 D4). -->
+            <label for="note-body" class="xtrim-required">Nota</label>
+            <textarea
+              id="note-body"
+              rows="3"
+              placeholder="Escribe una nota interna"
+              [formField]="noteForm.body"
+              [class.xtrim-flagged]="(noteForm.body().touched() || attempted()) && noteForm.body().invalid()"
+              [attr.aria-invalid]="(noteForm.body().touched() || attempted()) && noteForm.body().invalid() ? 'true' : null"
+              aria-describedby="note-body-error"
+            ></textarea>
+            @if ((noteForm.body().touched() || attempted()) && noteForm.body().invalid()) {
+              <!-- La palabra del contrato, bajo el input que la pide (P46):
+                   visible solo tocada-inválida o tras un intento. -->
+              <small class="xtrim-error" id="note-body-error">{{ noteForm.body().errors()[0].message }}</small>
+            }
+          </div>
+          <button class="ui small primary button" type="submit">Agregar nota</button>
+        </form>
+
+        @if (item.notes.length) {
+          <div class="xtrim-notes">
+            @for (note of item.notes; track note.id) {
+              <div class="xtrim-note">
+                <div>{{ note.body }}</div>
+                <div class="xtrim-muted">{{ note.author }} — {{ note.createdAt }}</div>
+              </div>
+            }
+          </div>
+        }
+
+        <h4 class="ui header">Cambios de estado</h4>
+        @if (item.statusHistory.length) {
+          <div class="xtrim-timeline">
+            @for (entry of item.statusHistory; track entry.id) {
+              <div class="xtrim-timeline__entry">
+                <i class="circle icon"></i>
+                <div>
+                  <strong>{{ statusLabel(entry.previousStatus) ?? '—' }}</strong> →
+                  {{ statusLabel(entry.newStatus) }}
+                  <div class="xtrim-muted">{{ entry.changedBy }} — {{ entry.changedAt }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="xtrim-muted">Todavía no hubo cambios de estado.</p>
+        }
+      </div>
+    </div>
+  }
+</div>

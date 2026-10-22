@@ -1,0 +1,112 @@
+<div class="ui container">
+  <div class="xtrim-listing__header">
+    <div>
+      <h1 class="ui header">{{ title() }}</h1>
+      @if (result.hasValue()) {
+        @if (!empty()) {
+          <p class="xtrim-listing__count">
+            {{ result.value().totalElements }}
+            {{ result.value().totalElements === 1 ? 'resultado' : 'resultados' }}
+          </p>
+        }
+      }
+    </div>
+
+    <form class="xtrim-listing__search" (ngSubmit)="search()">
+      <div class="ui icon input">
+        <input
+          type="search"
+          name="q"
+          placeholder="Buscar en el catálogo"
+          aria-label="Buscar"
+          [ngModel]="query()"
+          (ngModelChange)="query.set($event)"
+        />
+        <i class="search icon"></i>
+      </div>
+    </form>
+  </div>
+
+  <div class="xtrim-listing__filters">
+    <button
+      type="button"
+      class="ui labeled filter button"
+      [class.active]="params().get('onSale') === 'true'"
+      [attr.aria-pressed]="params().get('onSale') === 'true'"
+      (click)="toggleOnSale()"
+    >
+      <i class="tag icon"></i>
+      <span class="text">Solo con oferta</span>
+    </button>
+
+    <label class="xtrim-listing__sort">
+      <span class="text">Ordenar</span>
+      <select
+        class="ui dropdown"
+        aria-label="Ordenar el catálogo"
+        (change)="sortBy($any($event.target).value)"
+      >
+        @for (sort of sorts; track sort.value) {
+          <option [value]="sort.value" [selected]="sort.value === currentSort()">
+            {{ sort.label }}
+          </option>
+        }
+      </select>
+    </label>
+  </div>
+
+  @if (result.hasValue()) {
+    @if (empty()) {
+      @if (outOfRangePage()) {
+        <!-- Una página que corrió más allá del final del listado: no es que la
+             búsqueda no encontró nada, es que esta hoja ya no existe. -->
+        <div class="ui segment xtrim-listing__empty">
+          <h2 class="ui header">Esta página se quedó fuera del catálogo</h2>
+          <p>
+            El listado tiene {{ result.value().totalElements }}
+            {{ result.value().totalElements === 1 ? 'resultado' : 'resultados' }}, pero
+            esta hoja ya no existe.
+          </p>
+          <button class="ui button" type="button" (click)="goToPage(0)">
+            Volver a la primera página
+          </button>
+        </div>
+      } @else {
+        <div class="ui segment xtrim-listing__empty">
+          <h2 class="ui header">No encontramos nada</h2>
+          <p>Prueba con otra palabra, o quita los filtros.</p>
+          <a class="ui button" routerLink="/productos">Ver todo el catálogo</a>
+        </div>
+      }
+    } @else {
+      <div class="ui stackable grid">
+        @for (item of result.value().content; track item.id) {
+          <div class="four wide column xtrim-column">
+            <app-item-card [item]="item" />
+          </div>
+        }
+      </div>
+
+      <app-pagination
+        [page]="result.value().page"
+        [totalPages]="result.value().totalPages"
+        (pageChange)="goToPage($event)"
+      />
+    }
+  } @else if (result.error()) {
+    <!-- La negativa tiene voz (P51 D3): antes el fallo era un esqueleto eterno.
+         La caja habla con la voz de la casa y deja reintentar. -->
+    <div class="xtrim-message is-error" role="alert"
+      animate.enter="xtrim-message--enter"
+      animate.leave="xtrim-message--leave"
+    >
+      <i class="exclamation circle icon" aria-hidden="true"></i>
+      <span>No pudimos cargar el catálogo.</span>
+    </div>
+    <button class="ui button" type="button" (click)="result.reload()">Reintentar</button>
+  } @else if (result.isLoading()) {
+    <div class="ui segment">
+      <app-loading [lines]="5" label="Cargando el catálogo" />
+    </div>
+  }
+</div>

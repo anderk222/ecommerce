@@ -1,0 +1,261 @@
+/* La ficha compone en el card de la casa (la superficie del detalle del
+   lead): una sola frontera alberga la mirada — la galería — y la decisión —
+   el panel de lienzo con la ficha de especificaciones a su sombra; la
+   descripción cierra el card de ancho completo sobre la línea trazada.
+   Ninguna de las dos columnas queda menor que la otra: el aire vertical que
+   el cliente leyó como «vacía» muere aquí. Once columnas y cinco, las
+   dieciséis del lienzo completas (enmienda del cliente 2026-10-21).
+
+   La sección no se separa con cajas: se separa con la línea trazada de la
+   casa (1px, Borde) — el mismo trazo de las tablas —; el aire sobre cada
+   encabezado es mayor que el que hay debajo. */
+
+/* El card respira: 1.5rem, la voz del margen local (xtrim-filters), sobre
+   el 1em de Fomantic — el aire de un catálogo de calidad. */
+.ui.segment.xtrim-detail__card {
+  padding: 1.5rem;
+}
+
+/* La imagen lleva bandeja: el borde trazado la enmarca — con ella o con la
+   caja vacía del estado sin foto, la galería nunca lee como un lienzo
+   suelto. En reposo, sólo borde: la sombra es respuesta (Elevation). */
+.xtrim-detail__card .xtrim-gallery-main {
+  border: 1px solid var(--xtrim-border);
+}
+
+/* Los pulgares respiran con la bandeja: el grupo queda dentro del margen
+   que la imagen abre. */
+.xtrim-gallery-thumbs {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* --- Las secciones de la hoja --------------------------------------------- */
+/* Los encabezados de la descripción y de la ficha hablan en la voz Title
+   (1.286rem, 700) — de la página no heredan el 2rem del display: dentro del
+   card, la sección habla a la voz del título de tarjeta. El override nace
+   con especificidad mayor que la de Fomantic (h2.ui.header) — el empate se
+   rompe a favor de la casa (P36). */
+.xtrim-detail__card .xtrim-detail__description h2.ui.header,
+.xtrim-detail__card .xtrim-detail__specs h2.ui.header {
+  font-size: 1.28571429rem;
+  margin: 0 0 0.5rem;
+}
+
+/* La ficha acompaña al dinero: en la columna de la decisión el aire lo pone
+   el panel (su borde ya separa); sin línea que compita con su borde. */
+.xtrim-detail__aside .xtrim-detail__specs {
+  margin-top: 1.25rem;
+}
+
+/* La descripción cierra la hoja de ancho completo, bajo la línea trazada. */
+.xtrim-detail__description {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--xtrim-border);
+}
+
+/* El ancho se declara en la casa: el Fomantic podado no trae el ancho de
+   «sixteen wide» (ninguna página lo usaba) y sin él la banda colapsa al
+   contenido — el polo opuesto del aire que este pase cierra. El dieciséis
+   es el lienzo completo, el mismo !important de los anchos de Fomantic
+   (P36: el empate se rompe a favor de la casa). */
+.xtrim-detail__card .xtrim-detail__description,
+.xtrim-detail__card .xtrim-detail__notify-band {
+  width: 100% !important;
+}
+
+/* El aviso de stock, banda de ancho completo tras la descripción: el aire
+   entre las dos bandas lo pone el panel que el componente trae (su margen
+   superior); la banda no añade línea ni aire propio. */
+.xtrim-detail__notify-band {
+  padding-top: 0;
+}
+
+/* La prosa mide: la línea de lectura cierra en 68ch y respira (1.5) para
+   que la hoja se lea como página, no como celda de tabla. */
+.xtrim-detail__description p {
+  max-width: 68ch;
+  line-height: 1.5;
+}
+
+/* La tabla de la ficha: el nombre ocupa lo que la palabra pide (11rem) y
+   el valor respira con lo que queda — no el 40% heredado, que a 750px
+   estira el hueco a media tabla. El override gana por especificidad a la
+   regla global (.xtrim-specs th). Bajo 992px la columna de la decisión
+   se estrecha: el nombre vuelve a lo que pide, el valor nunca se aplasta. */
+.xtrim-detail__card .xtrim-specs th {
+  width: 11rem;
+}
+
+@media (max-width: 991px) {
+  .xtrim-detail__card .xtrim-specs th {
+    width: auto;
+  }
+}
+
+/* La última línea del instrumento no cierra: el aire del card la cierra —
+   la tabla queda abierta por abajo, como una hoja. */
+.xtrim-detail__card .xtrim-specs tr:last-child th,
+.xtrim-detail__card .xtrim-specs tr:last-child td {
+  border-bottom: 0;
+}
+
+/* --- El panel de la decisión ----------------------------------------------- */
+/* Lienzo, no caja: la frontera la pone el card — dentro de él la voz es la
+   del cuerpo del historial del lead: surface del sistema, radio de la
+   casa, sin borde propio. Ya no sigue al scroll: con la ficha a su sombra
+   la columna de la decisión mide lo que la mirada, y el CTA abre en el
+   primer viewport sin tapar nunca lo que le sigue. */
+.xtrim-detail__buy {
+  background: var(--xtrim-canvas);
+  border-radius: 0.28571429rem;
+  padding: 1.25rem 1.5rem;
+}
+
+/* --- Las voces que el card comparte con la página --------------------------- */
+/* The way back: small, in the voice the system already gave to links (Azul
+   Señal — blue signals what is clickable), above the composition so the way
+   out never depends on the browser. */
+.xtrim-detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 0.5rem;
+  color: var(--xtrim-primary);
+  text-decoration: none;
+}
+
+.xtrim-detail__back:hover {
+  color: var(--xtrim-primary-deep);
+}
+
+.xtrim-detail__back .icon {
+  margin: 0;
+}
+
+.xtrim-detail__categories {
+  margin-bottom: 0.75rem;
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+/* --- La línea del dinero: dos salas del panel --------------------------------
+   Entre la identidad (nombre, chip) y el dinero media la línea del sistema
+   (#d4d4d5): visible sobre el lienzo donde Borde (#e4e7eb) se hunde. */
+.xtrim-detail__price {
+  margin: 1rem 0 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--xtrim-hairline);
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+/* The money is the strongest voice of the page: it speaks in the display
+   tier while the card speaks in its own; the vocabulary is shared, the
+   volume is the detail's. */
+.xtrim-detail__price .xtrim-price-final {
+  font-size: 2rem;
+}
+
+.xtrim-detail__stock {
+  margin-bottom: 1.25rem;
+}
+
+/* --- Las cuatro llamadas: un primario y tres calladas -----------------------
+   Cada botón respira por su cuenta — el grupo unido de Fomantic (la losa
+   gris donde tres llamadas leían deshabilitadas) se retiró. La llamada
+   primaria lleva Azul Señal; las calladas son blancas con el borde
+   trazado de la casa (hairline) y la tinta del texto; el cursor les habla
+   con la superficie del lienzo y una frontera que sube de tono — sombra
+   ninguna en reposo (Elevation). */
+.xtrim-detail__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 0.5rem !important;
+}
+
+.xtrim-detail__actions .ui.button {
+  background: #ffffff;
+  border: 1px solid var(--xtrim-hairline);
+  border-radius: 0.28571429rem;
+  color: var(--xtrim-ink);
+}
+
+.xtrim-detail__actions .ui.button:hover,
+.xtrim-detail__actions .ui.button:focus {
+  background: var(--xtrim-canvas);
+  border-color: var(--xtrim-label);
+  color: var(--xtrim-ink);
+}
+
+/* El primario conserva su voz propia: Azul Señal sólido, hover #1e70bf. */
+.xtrim-detail__actions .ui.primary.button {
+  background: var(--xtrim-primary);
+  border-color: var(--xtrim-primary);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.xtrim-detail__actions .ui.primary.button:hover,
+.xtrim-detail__actions .ui.primary.button:focus {
+  background: var(--xtrim-primary-deep);
+  border-color: var(--xtrim-primary-deep);
+  color: #ffffff;
+}
+
+/* Deshabilitado es callado, no gris de losa: la opacidad de Fomantic sobre
+   la voz de cada botón ya lo dice; nada más se le añade. */
+.xtrim-detail__actions .ui.button:disabled,
+.xtrim-detail__actions .ui.disabled.button {
+  cursor: not-allowed;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* --- The mobile composer --------------------------------------------------- */
+/* Under the Fomantic breakpoint the page reads in the order the decision
+   needs: what it looks like, what it costs, how to buy it — and only then
+   the specification and the description. CSS only: the DOM keeps the order
+   the crawler sees, the columns give way (display: contents) and the
+   sections order themselves. */
+@media (max-width: 767px) {
+  .ui.stackable.grid.xtrim-detail__grid {
+    flex-direction: column;
+  }
+
+  /* display: contents devuelve la mano a las secciones: gallery, buy, specs y
+     notify ordenan por sí mismos. La descripción conserva su caja — es la
+     banda completa: con contents sus h2/p des obligarse a solas y ganarían
+     la fila sin querer. */
+  .ui.stackable.grid.xtrim-detail__grid > .column:not(.row):not(.xtrim-detail__description) {
+    display: contents;
+  }
+
+  .xtrim-detail__gallery {
+    order: 1;
+  }
+
+  .xtrim-detail__buy {
+    order: 2;
+    margin-top: 1.5rem;
+  }
+
+  .xtrim-detail__specs {
+    order: 3;
+  }
+
+  .xtrim-detail__description {
+    order: 4;
+  }
+
+  .xtrim-detail__notify {
+    order: 5;
+  }
+}

@@ -1,0 +1,57 @@
+<div class="ui container" animate.enter="enter-animation">
+  <h2 class="ui header">Tablero</h2>
+
+  @if (message() ?? readError(); as text) {
+    <!-- La negativa de la lectura habla en la caja de la pantalla (P51 D4):
+         una sola voz por pantalla. -->
+    <div class="xtrim-message" [class.is-error]="failed() || readError() !== null"
+      [attr.role]="failed() || readError() !== null ? 'alert' : 'status'"
+      animate.enter="xtrim-message--enter"
+      animate.leave="xtrim-message--leave"
+    >
+      @if (failed() || readError() !== null) {
+        <i class="exclamation circle icon" aria-hidden="true"></i>
+      } @else {
+        <i class="check circle outline icon" aria-hidden="true"></i>
+      }
+      <span>{{ text }}</span>
+    </div>
+  }
+
+  <div class="xtrim-kanban">
+    @for (column of columns(); track column.status) {
+      <div
+        class="xtrim-kanban__column"
+        [class.is-hovered]="hoveredColumn() === column.status"
+        (dragover)="onDragOver($event, column.status)"
+        (dragleave)="onDragLeave(column.status)"
+        (drop)="onDrop($event, column.status)"
+      >
+        <div class="xtrim-kanban__header">
+          <span class="xtrim-kanban__title">{{ column.label }}</span>
+          <span class="ui tiny label">{{ column.count }}</span>
+        </div>
+        <div class="xtrim-kanban__total">
+          <!-- La columna suma y el dinero cobra su tinta (P32 D2). -->
+          <span class="xtrim-crm-money">${{ column.total.toFixed(2) }}</span>
+        </div>
+
+        @for (lead of column.leads; track lead.id) {
+          <div
+            class="ui small card xtrim-kanban__card"
+            draggable="true"
+            (dragstart)="onDragStart($event, lead)"
+          >
+            <div class="content">
+              <div class="header">{{ lead.name }}</div>
+              <div class="xtrim-muted">{{ lead.email }}</div>
+              <div><span class="xtrim-crm-money">${{ lead.saleAmount.toFixed(2) }}</span></div>
+            </div>
+          </div>
+        } @empty {
+          <div class="xtrim-kanban__empty">Arrastra una tarjeta aquí</div>
+        }
+      </div>
+    }
+  </div>
+</div>

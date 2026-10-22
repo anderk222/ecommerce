@@ -1,0 +1,29 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.xtrim-main {
+  flex: 1 0 auto;
+  padding: 2rem 0 4rem;
+}
+
+/* The skip link lives under the masthead and only exists for the keyboard:
+   the first Tab of any page lands on a visible path to the content. */
+.xtrim-skip {
+  position: absolute;
+  left: -100vw;
+  top: 0;
+  z-index: 1000;
+  background: var(--xtrim-primary);
+  color: #ffffff;
+  padding: 0.6rem 1rem;
+  border-radius: 0 0 0.28571429rem 0;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.xtrim-skip:focus {
+  left: 0;
+}

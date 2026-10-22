@@ -1,0 +1,85 @@
+<div class="ui container" animate.enter="enter-animation" >
+  <h2 class="ui header">Indicadores</h2>
+
+  @if (readError(); as text) {
+    <div class="xtrim-message is-error" role="alert"
+      animate.enter="xtrim-message--enter"
+      animate.leave="xtrim-message--leave"
+    >
+      <i class="exclamation circle icon" aria-hidden="true"></i>
+      <span>{{ text }}</span>
+    </div>
+  }
+
+  @if (kpis.hasValue()) {
+    @let indicators = kpis.value();
+    <div class="ui stackable grid">
+      <div class="four wide column xtrim-column">
+        <!-- Los números de la casa (P32 D5): peso de la familia, cifras
+             tabulares; lo que es dinero cobra su tinta. -->
+        <div class="xtrim-kpi">
+          <div class="xtrim-kpi__value is-money">${{ indicators.closedSales.toFixed(2) }}</div>
+          <div class="xtrim-kpi__label">Ventas cerradas</div>
+        </div>
+      </div>
+      <div class="four wide column xtrim-column">
+        <div class="xtrim-kpi">
+          <div class="xtrim-kpi__value">{{ percent(indicators.conversionRate) }}</div>
+          <div class="xtrim-kpi__label">Tasa de conversión</div>
+        </div>
+      </div>
+      <div class="four wide column xtrim-column">
+        <div class="xtrim-kpi">
+          <div class="xtrim-kpi__value is-money">${{ indicators.potentialAmount.toFixed(2) }}</div>
+          <div class="xtrim-kpi__label">Monto en gestión</div>
+        </div>
+      </div>
+      <div class="four wide column xtrim-column">
+        <div class="xtrim-kpi">
+          <div class="xtrim-kpi__value">{{ indicators.totalCount }}</div>
+          <div class="xtrim-kpi__label">Leads totales</div>
+        </div>
+      </div>
+      <div class="four wide column xtrim-column">
+        <div class="xtrim-kpi">
+          <div class="xtrim-kpi__value">{{ indicators.wonCount }}</div>
+          <div class="xtrim-kpi__label">Ganados</div>
+        </div>
+      </div>
+      <div class="four wide column xtrim-column">
+        <div class="xtrim-kpi">
+          <div class="xtrim-kpi__value">{{ indicators.lostCount }}</div>
+          <div class="xtrim-kpi__label">Perdidos</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="ui header">Leads por estado</h3>
+    <table class="ui table xtrim-ledger">
+      <tbody>
+        @for (entry of indicators.byStatus | keyvalue; track entry.key) {
+          <tr>
+            <td>
+              <!-- La leyenda del CRM (P32 D2). -->
+              <span
+                class="ui tiny label"
+                [class.green]="entry.key === 'IN_PROGRESS'"
+                [class.blue]="entry.key === 'NEW'"
+                [class.grey]="entry.key === 'CLOSED'"
+              >
+                {{
+                  entry.key === 'NEW'
+                    ? 'Nuevo'
+                    : entry.key === 'IN_PROGRESS'
+                      ? 'En gestión'
+                      : 'Cerrado'
+                }}
+              </span>
+            </td>
+            <td class="right aligned">{{ entry.value }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

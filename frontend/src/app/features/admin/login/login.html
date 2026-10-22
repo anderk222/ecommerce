@@ -1,0 +1,85 @@
+<div class="ui container xtrim-login">
+  <div class="ui segment">
+    <h1 class="ui header">Panel de administración</h1>
+
+    @if (notice(); as message) {
+      <!-- La voz de la expiración: un aviso callado — no rojo, no alarma —
+           porque no fue un error del miembro del staff. -->
+      <div class="xtrim-message" role="status"
+        animate.enter="xtrim-message--enter"
+        animate.leave="xtrim-message--leave"
+      >
+        <i class="info circle icon" aria-hidden="true"></i>
+        <span>{{ message }}</span>
+      </div>
+    }
+
+    @if (message(); as message) {
+      <!-- La voz de la conversación (P38): el mensaje general del submit
+           invalidado y la palabra del servidor — la de arriba, tal y como
+           llegó (P26: el pase levanta la voz, nunca las palabras). -->
+      <div class="xtrim-message" [class.is-error]="failed()" [attr.role]="failed() ? 'alert' : 'status'"
+        animate.enter="xtrim-message--enter"
+        animate.leave="xtrim-message--leave"
+      >
+        @if (failed()) {
+          <i class="exclamation circle icon" aria-hidden="true"></i>
+        } @else {
+          <i class="check circle outline icon" aria-hidden="true"></i>
+        }
+        <span>{{ message }}</span>
+      </div>
+    }
+
+    <form class="ui form" novalidate (submit)="submit($event)">
+      <div class="field with-room">
+        <label for="email" class="xtrim-required">Correo</label>
+        <input
+          id="email"
+          type="email"
+          autocomplete="username"
+          placeholder="admin@xtrim.ec"
+          [formField]="loginForm.email"
+          [class.xtrim-flagged]="(loginForm.email().touched() || attempted()) && loginForm.email().invalid()"
+          [attr.aria-invalid]="(loginForm.email().touched() || attempted()) && loginForm.email().invalid() ? 'true' : null"
+          aria-describedby="email-error"
+        />
+        @if ((loginForm.email().touched() || attempted()) && loginForm.email().invalid()) {
+          <!-- La palabra del contrato, bajo el input que la pide (P38):
+               visible solo tocada-inválida o tras un intento. -->
+          <small class="xtrim-error" id="email-error">{{ loginForm.email().errors()[0].message }}</small>
+        }
+      </div>
+
+      <div class="field with-room">
+        <label for="password" class="xtrim-required">Contraseña</label>
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          [formField]="loginForm.password"
+          [class.xtrim-flagged]="(loginForm.password().touched() || attempted()) && loginForm.password().invalid()"
+          [attr.aria-invalid]="(loginForm.password().touched() || attempted()) && loginForm.password().invalid() ? 'true' : null"
+          aria-describedby="password-error"
+        />
+        @if ((loginForm.password().touched() || attempted()) && loginForm.password().invalid()) {
+          <small class="xtrim-error" id="password-error">{{ loginForm.password().errors()[0].message }}</small>
+        }
+      </div>
+
+      <button class="ui primary fluid button" type="submit" [disabled]="busy()">
+        {{ busy() ? 'Entrando…' : 'Entrar' }}
+      </button>
+    </form>
+
+    <div class="ui divider"></div>
+    <!-- La nota de la casa (P27 D3): las cuentas son un servicio deliberado a
+         la evaluación — acabadas y nombradas, no residuo de depuración. -->
+    <div class="xtrim-note">
+      <p class="xtrim-note__label">Cuentas de prueba</p>
+      <p>
+        <code>admin@xtrim.ec</code> / <code>admin123</code> (administrador).
+      </p>
+    </div>
+  </div>
+</div>

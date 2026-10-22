@@ -1,0 +1,53 @@
+.xtrim-section {
+  margin-bottom: 2.5rem;
+}
+
+.xtrim-section__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.xtrim-section__header .ui.header {
+  margin-bottom: 0.75rem;
+}
+
+/* The section header's icon is the word's mark, not a shout: it stands in
+   Etiqueta so the heading owns the row (P34 2.5). */
+.xtrim-section__header .ui.header .icon {
+  color: var(--xtrim-label);
+}
+
+/* The store's first breath: the branch the visitor meets while the catalogue
+   travels. One paragraph of truth, one pair of doors — and not a pixel of
+   promo taller than what the system can promise. */
+.xtrim-hero {
+  padding: 2.5rem 0 1.5rem;
+  max-width: 65ch;
+}
+
+.xtrim-hero__title {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.28571429;
+  color: var(--xtrim-ink);
+  margin-bottom: 0.75rem;
+}
+
+.xtrim-hero__lead {
+  color: var(--xtrim-label);
+  line-height: 1.42857143;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 767px) {
+  .xtrim-hero {
+    padding: 1.5rem 0 1rem;
+  }
+
+  .xtrim-hero__title {
+    font-size: 1.5rem;
+  }
+}

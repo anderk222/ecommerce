@@ -1,0 +1,62 @@
+.xtrim-cart__quantity {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* The control is a workhand with a name: the boxes of the steps give a thumb
+   what to land on, and the quantity answers between them, tabular (P29 D4). */
+.xtrim-cart__step {
+  min-width: 2.6rem;
+  min-height: 2.6em;
+  padding: 0.5em 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.xtrim-cart__qty {
+  min-width: 2ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--xtrim-ink);
+}
+
+/* The stock is a word in Etiqueta — a fact, never a colour (P29 D4). */
+.xtrim-cart__stock {
+  color: var(--xtrim-label);
+  font-size: 0.85rem;
+  margin-top: 0.15rem;
+}
+
+/* The conclusion of the ledger: the money voice of Verde Precio on the one
+   figure the visitor cannot misread (P29 D3). */
+.xtrim-cart__total {
+  color: var(--xtrim-price-ink);
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The action bar separates the conversion from the destruction: the primary
+   target lives at the front, the red at the end — a click does not land by
+   proximity (P29 D3). */
+.xtrim-cart__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.xtrim-cart__conversions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.xtrim-cart-empty {
+  padding: 2rem 1.5rem;
+}

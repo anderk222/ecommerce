@@ -1,0 +1,126 @@
+<div class="ui container" animate.enter="enter-animation">
+  <h1 class="ui header">Categorías</h1>
+
+  @if (message() ?? readError(); as text) {
+    <!-- La voz del mensaje del sistema: el estado lo llevan la palabra y el
+         icono, nunca un relleno de Fomantic; el texto del servidor se muestra
+         tal como llegó, sin paráfrasis (P26 D3). El rol vive con la voz
+         (P40 D4): la negativa es alert, la noticia es status (P38). La
+         negativa de la lectura habla aquí también (P51 D4): una sola caja
+         por pantalla. -->
+    <div class="xtrim-message" [class.is-error]="failed() || readError() !== null"
+      [attr.role]="failed() || readError() !== null ? 'alert' : 'status'"
+      animate.enter="xtrim-message--enter"
+      animate.leave="xtrim-message--leave"
+    >
+      @if (failed() || readError() !== null) {
+        <i class="exclamation circle icon" aria-hidden="true"></i>
+      } @else {
+        <i class="check circle outline icon" aria-hidden="true"></i>
+      }
+      <span>{{ text }}</span>
+    </div>
+  }
+
+  <div class="ui segment">
+    <h2 class="ui header">Nueva categoría</h2>
+    <!-- El submit nativo con novalidate: la manera que el pass enseña —
+         sin NgForm el (ngSubmit) nunca habló (P38, heredado). -->
+    <form class="ui form" novalidate (submit)="create($event)">
+      <div class="field with-room">
+        <!-- La marca del validator: el asterisco es un hecho (P28 D4). -->
+        <label for="new-category" class="xtrim-required">Nombre</label>
+        <input
+          id="new-category"
+          type="text"
+          placeholder="Por ejemplo: Deportes"
+          [formField]="createForm.name"
+          [class.xtrim-flagged]="(createForm.name().touched() || attempted()) && createForm.name().invalid()"
+          [attr.aria-invalid]="(createForm.name().touched() || attempted()) && createForm.name().invalid() ? 'true' : null"
+          aria-describedby="new-category-error"
+        />
+        @if ((createForm.name().touched() || attempted()) && createForm.name().invalid()) {
+          <!-- La palabra del contrato, bajo el input que la pide (P40):
+               visible solo tocada-inválida o tras un intento. -->
+          <small class="xtrim-error" id="new-category-error">
+            {{ createForm.name().errors()[0].message }}
+          </small>
+        }
+      </div>
+      <button class="ui primary button" type="submit">Crear</button>
+    </form>
+  </div>
+
+  <!-- El ledger del panel (P26): cabecera en Etiqueta, filas separadas por la
+       línea hairline horizontal, ninguna línea vertical de celda. -->
+  <table class="ui table xtrim-ledger">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Slug</th>
+        <th>Ítems</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @if (categories.hasValue()) {
+        @if (!rows().length) {
+          <tr>
+            <td class="xtrim-ledger__empty" colspan="4">
+              No hay categorías todavía: crea la primera arriba.
+            </td>
+          </tr>
+        }
+      } @else if (categories.isLoading()) {
+        <!-- La fila de carga silenciosa: la tabla no anuncia vacío mientras
+             la petición vuela (P26 D4). La espera vive detrás del valor
+             (P51 D2): un re-read no borra el ledger pintado. -->
+        <tr>
+          <td colspan="4">
+            <app-loading [lines]="1" label="Cargando las categorías" />
+          </td>
+        </tr>
+      }
+      @for (category of rows(); track category.id) {
+        <tr>
+          <td>
+            @if (editingId() === category.id) {
+              <!-- El editor de la celda no es un formulario (P40 D6): la
+                   casa escribe su valor sin la maquinaria de los forms y
+                   guarda sus hábitos — enter salva, escape deja. -->
+              <input
+                class="xtrim-ledger__input"
+                type="text"
+                [value]="editingName()"
+                (input)="editingName.set($any($event.target).value)"
+                (keyup.enter)="save()"
+                (keydown.escape)="editingId.set(null)"
+              />
+            } @else {
+              {{ category.name }}
+            }
+          </td>
+          <td><code>{{ category.slug }}</code></td>
+          <td>{{ category.itemCount }}</td>
+          <td class="right aligned">
+            @if (editingId() === category.id) {
+              <button class="ui primary small button" type="button" (click)="save()">Guardar</button>
+              <button class="ui small button" type="button" (click)="editingId.set(null)">
+                Cancelar
+              </button>
+            } @else {
+              <button class="ui small button" type="button" (click)="startEditing(category)">
+                Editar
+              </button>
+              <!-- El rojo de la destrucción: el veredicto del panel (una sola
+                   excepción al shim, grabada en P26 D3). -->
+              <button class="ui red small button" type="button" (click)="remove(category)">
+                Eliminar
+              </button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

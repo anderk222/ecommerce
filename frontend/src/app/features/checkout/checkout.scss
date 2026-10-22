@@ -1,0 +1,12 @@
+.xtrim-note {
+  color: #9aa5b1;
+  font-size: 0.85rem;
+}
+
+.xtrim-confirmation {
+  max-width: 48rem;
+}
+
+/* La sala reservada de la palabra (P42): el campo con-room la hereda del
+   instrumento común — P40 D7 lo mudó aguas arriba a la hoja global
+   (.ui.form .field.with-room), y el checkout ya no la repite. */

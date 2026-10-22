@@ -1,0 +1,20 @@
+/* The quiet chip of the badges (Destacado, Sin stock): the voice of Label —
+   the information is carried by the word, not by a loud fill. The class
+   lives in the global sheet since P25 (the detail joins the card); only the
+   layout of the badges is the card's own. */
+.xtrim-card__badges {
+  display: flex;
+  gap: 0.35rem;
+  min-height: 1.5rem;
+}
+
+.xtrim-card__price {
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+.xtrim-price-currency {
+  color: var(--xtrim-muted);
+  font-size: 0.85rem;
+  margin-left: 0.25rem;
+}

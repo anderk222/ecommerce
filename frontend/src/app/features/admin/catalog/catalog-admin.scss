@@ -1,0 +1,32 @@
+.xtrim-admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.xtrim-filters {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.xtrim-filters .field {
+  margin: 0;
+  min-width: 10rem;
+}
+
+/* La fila del descuento: la misma hairline del ledger, sin peso nuevo —
+   el formulario vive dentro de la fila que lo pide. */
+.xtrim-ledger__discount > td {
+  background: transparent;
+  border-top: none;
+}
+
+.xtrim-ledger__discount .ui.form {
+  margin: 0;
+}
+

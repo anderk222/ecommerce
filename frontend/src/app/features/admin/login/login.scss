@@ -1,0 +1,14 @@
+.xtrim-login {
+  max-width: 26rem;
+  margin-top: 3rem;
+
+  /* La marca del validator (P28 D4) y la sala reservada (P40 D7) ya viven
+    en la hoja global: el asterisco en Etiqueta, la reserva con-room en el
+    instrumento común que P38 inició y P40 mudó — nada local duplica lo que
+    la casa definió una vez. */
+  .xtrim-required::after {
+    content: ' *';
+    color: var(--xtrim-label, rgba(0, 0, 0, 0.6));
+    font-weight: 700;
+  }
+}

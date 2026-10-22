@@ -1,0 +1,117 @@
+<div class="ui container">
+  <h1 class="ui header">Carrito</h1>
+
+  @if (message(); as text) {
+    <!-- La voz del mensaje del sistema (P26): la negación lleva la exclamación
+         y las confirmaciones la palomita callada — las palabras son las de
+         siempre (P14), verbatim. -->
+    <div class="xtrim-message" [class.is-error]="messageFailed()" role="status" aria-live="polite"
+      animate.enter="xtrim-message--enter"
+      animate.leave="xtrim-message--leave"
+    >
+      @if (messageFailed()) {
+        <i class="exclamation circle icon" aria-hidden="true"></i>
+      } @else {
+        <i class="check circle outline icon" aria-hidden="true"></i>
+      }
+      <span>{{ text }}</span>
+    </div>
+  }
+
+  @if (empty()) {
+    <!-- El estado vacío: una invitación con salida, nunca un callejón. -->
+    <div class="ui segment xtrim-cart-empty">
+      <h3 class="ui header">Tu carrito está vacío</h3>
+      <p>Explora el catálogo y agrega lo que te interese.</p>
+      <a class="ui primary button" routerLink="/productos">Ver productos</a>
+    </div>
+  } @else {
+    <!-- El ledger de la venta (P29): las columnas de siempre, las voces del
+         mundo — la aritmética en Pizarra con cifras tabulares, el total como
+         conclusión en la tinta de Verde Precio, y el rojo solo destruye. -->
+    <table class="ui table xtrim-ledger">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th class="right aligned">Precio</th>
+          <th>Cantidad</th>
+          <th class="right aligned">Subtotal</th>
+          <th><span class="xtrim-sr-only">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (line of lines(); track line.itemId) {
+          <tr>
+            <td>
+              <!-- El enlace lleva el contexto de llegada: así el detalle regresa al carrito y no
+                   lo manda al listado canónico. El estado viaja en el history, la URL no cambia. -->
+              <a [routerLink]="linkOf(line)" [state]="{ from: '/carrito' }">{{ line.name }}</a>
+              @if (line.stock !== null) {
+                <div class="xtrim-cart__stock">
+                  {{ line.stock === 0 ? 'Sin stock' : line.stock + ' disponibles' }}
+                </div>
+              }
+            </td>
+            <td class="right aligned">
+              <span class="xtrim-money">{{ line.price.toFixed(2) }}</span>
+              <span class="xtrim-money__currency">USD</span>
+            </td>
+            <td>
+              <div class="xtrim-cart__quantity">
+                <button
+                  class="ui small button xtrim-cart__step"
+                  type="button"
+                  (click)="setQuantity(line, line.quantity - 1)"
+                  [attr.aria-label]="'Reducir una unidad de «' + line.name + '»'"
+                >
+                  −
+                </button>
+                <span class="xtrim-cart__qty" aria-hidden="true">{{ line.quantity }}</span>
+                <button
+                  class="ui small button xtrim-cart__step"
+                  type="button"
+                  (click)="setQuantity(line, line.quantity + 1)"
+                  [attr.aria-label]="'Agregar una unidad de «' + line.name + '»'"
+                >
+                  +
+                </button>
+              </div>
+            </td>
+            <td class="right aligned">
+              <span class="xtrim-money">{{ (line.price * line.quantity).toFixed(2) }}</span>
+            </td>
+            <td class="right aligned">
+              <button
+                class="ui red small button"
+                type="button"
+                (click)="remove(line)"
+                [attr.aria-label]="'Quitar «' + line.name + '» del carrito'"
+              >
+                Quitar
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="3">Total ({{ count() }} unidades)</th>
+          <th class="right aligned">
+            <!-- La conclusión del ledger: la tinta de Verde Precio, 700, tabular. -->
+            <span class="xtrim-cart__total">${{ total().toFixed(2) }}</span>
+          </th>
+          <th></th>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="xtrim-cart__actions">
+      <div class="xtrim-cart__conversions">
+        <a class="ui primary button" routerLink="/checkout">Finalizar compra</a>
+        <a class="ui button" routerLink="/productos">Seguir comprando</a>
+      </div>
+      <!-- La destrucción queda al final del bar, lejos de la mano del Azul Señal. -->
+      <button class="ui basic red button" type="button" (click)="clear()">Vaciar el carrito</button>
+    </div>
+  }
+</div>

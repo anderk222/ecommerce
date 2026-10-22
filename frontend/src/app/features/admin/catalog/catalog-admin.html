@@ -1,0 +1,214 @@
+<div class="ui container" animate.enter="enter-animation">
+  @let current = result();
+
+  <div class="xtrim-admin-header">
+    <h2 class="ui header">Catálogo</h2>
+    <a class="ui primary button" routerLink="/admin/catalog/nuevo">Nuevo ítem</a>
+  </div>
+
+  @if (notice(); as n) {
+    <!-- La voz del mensaje del sistema (P26 → P44 la alinea con el pass):
+         la negación lleva `alert`, la promesa `status` — la misma voz que
+         el login habla desde P38 D4. La negativa de la lectura habla aquí
+         también (P51 D4): una sola caja por pantalla. -->
+    <div class="xtrim-message" [class.is-error]="n.failed"
+      [attr.role]="n.failed ? 'alert' : 'status'"
+      animate.enter="xtrim-message--enter"
+      animate.leave="xtrim-message--leave"
+    >
+      @if (n.failed) {
+        <i class="exclamation circle icon" aria-hidden="true"></i>
+      } @else {
+        <i class="check circle outline icon" aria-hidden="true"></i>
+      }
+      <span>{{ n.text }}</span>
+    </div>
+  }
+
+  <!-- El submit nativo con novalidate: la manera que el pass enseña — sin
+       NgForm el (ngSubmit) nunca habló (P38, heredado). Los filtros no
+       llevan validator: nada en ellos puede ser inválido (P44 D2). -->
+  <form class="ui form xtrim-filters" novalidate (submit)="filter($event)">
+    <div class="field">
+      <label for="admin-q">Buscar</label>
+      <input
+        id="admin-q"
+        type="search"
+        placeholder="Nombre o descripción"
+        [formField]="filtersForm.q"
+      />
+    </div>
+
+    <div class="field">
+      <label for="admin-type">Tipo</label>
+      <select id="admin-type" [formField]="filtersForm.type">
+        @for (option of types; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="admin-state">Estado</label>
+      <select id="admin-state" [formField]="filtersForm.state">
+        @for (option of states; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="admin-sort">Ordenar</label>
+      <select id="admin-sort" [formField]="filtersForm.sort">
+        @for (option of sorts; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    <button class="ui button" type="submit">Aplicar</button>
+  </form>
+
+  <!-- El ledger del panel (P26 lo enseñó, P28 lo cita): sin líneas verticales
+       de celda, cabecera en Etiqueta, filas por la hairline horizontal. -->
+  <table class="ui table xtrim-ledger">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Tipo</th>
+        <th class="right aligned">Precio</th>
+        <th class="right aligned">Stock</th>
+        <th>Estado</th>
+        <th><span class="xtrim-sr-only">Acciones</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      @if (current) {
+        @if (!current.content.length) {
+          <tr>
+            <td class="xtrim-ledger__empty" colspan="6">
+              Ningún ítem responde a estos filtros: prueba con otro estado o con menos palabras.
+            </td>
+          </tr>
+        }
+      } @else if (items.isLoading()) {
+        <!-- La fila de carga silenciosa: la tabla no anuncia vacío mientras la
+             petición vuela (la voz que P26 puso en el ledger del panel). La
+             espera vive detrás del valor (P51 D2): un re-read no borra la
+             tabla pintada. -->
+        <tr>
+          <td colspan="6">
+            <app-loading [lines]="1" label="Cargando el catálogo" />
+          </td>
+        </tr>
+      }
+      @for (item of current?.content ?? []; track item.id) {
+        <tr>
+          <td>
+            <a [routerLink]="['/admin/catalog', item.id]">{{ item.name }}</a>
+            <div><code>{{ item.slug }}</code></div>
+          </td>
+          <td>{{ item.type === 'SERVICE' ? 'Servicio' : 'Producto' }}</td>
+          <td class="right aligned">
+            <!-- El dinero del panel (P28 D3): la aritmética en la tinta del
+                 sistema con cifras tabulares, la moneda en Neblina, y el
+                 descuento cierra la frase en la tinta de Verde Precio — la
+                 etiqueta roja deja el precio para siempre. -->
+            <span class="xtrim-money">{{ item.price.finalPrice }}</span>
+            <span class="xtrim-money__currency">{{ item.price.currency }}</span>
+            @if (item.price.discountPercentage > 0) {
+              <span class="xtrim-price-discount">-{{ item.price.discountPercentage }}%</span>
+            }
+          </td>
+          <td class="right aligned">
+            @if (item.stock === null) {
+              <span class="xtrim-null">—</span>
+            } @else {
+              {{ item.stock }}
+            }
+          </td>
+          <td>
+            @if (item.deletedAt) {
+              <span class="ui tiny label xtrim-chip">Eliminado</span>
+            } @else if (item.active) {
+              <span class="ui tiny label xtrim-chip">Activo</span>
+            } @else {
+              <span class="ui tiny label xtrim-chip">Inactivo</span>
+            }
+            @if (item.featured) {
+              <span class="ui tiny label xtrim-chip">Destacado</span>
+            }
+          </td>
+          <td class="right aligned">
+            @if (!item.deletedAt) {
+              <button class="ui small button" type="button" (click)="toggleActive(item)">
+                {{ item.active ? 'Inactivar' : 'Reactivar' }}
+              </button>
+              <button class="ui small button" type="button" (click)="startDiscount(item)">
+                Descuento
+              </button>
+              @if (item.price.discountPercentage > 0) {
+                <!-- La revocación ya existía en el componente y ningún botón la
+                     avisaba (pendiente heredado de P12): el segmento la muestra
+                     mientras el descuento está en vigor. -->
+                <button class="ui small button" type="button" (click)="revokeDiscount(item)">
+                  Revocar
+                </button>
+              }
+            }
+            <button class="ui red small button" type="button" (click)="remove(item)">Eliminar</button>
+          </td>
+        </tr>
+        @if (discountId() === item.id) {
+          <!-- El descuento vive en la fila que lo pide: el formulario abre
+               debajo del ítem, a la vista del lector, nunca al final del
+               ledger donde muchas filas lo esconden. -->
+          <tr class="xtrim-ledger__discount">
+            <td colspan="6">
+              <!-- El submit nativo con novalidate (P38, heredado): el intento
+                   con el porcentaje inservible nunca golpea la API (P44 D1). -->
+              <form class="ui form" novalidate (submit)="applyDiscount($event)">
+                <div class="inline fields">
+                  <div class="field with-room">
+                    <!-- La marca del validator: el asterisco es un hecho (P28 D4). -->
+                    <label for="discount-percentage" class="xtrim-required">Porcentaje</label>
+                    <input
+                      id="discount-percentage"
+                      type="number"
+                      [formField]="discountForm.percentage"
+                      [class.xtrim-flagged]="percentageError()"
+                      [attr.aria-invalid]="percentageError() ? 'true' : null"
+                      [attr.aria-describedby]="percentageError() ? 'discount-percentage-error' : null"
+                    />
+                    @if (percentageError(); as error) {
+                      <!-- La palabra del contrato, bajo el input que la pide (P44):
+                           solo tocada-inválida o tras el intento; el parse error
+                           mudo del navegador la casa la responde (D4). -->
+                      <small class="xtrim-error" id="discount-percentage-error">{{ error }}</small>
+                    }
+                  </div>
+                  <div class="field">
+                    <label for="discount-ends">Fin (vacío = indefinido)</label>
+                    <input id="discount-ends" type="date" [formField]="discountForm.endsAt" />
+                  </div>
+                  <button class="ui primary button" type="submit">Aplicar</button>
+                  <button class="ui button" type="button" (click)="cancelDiscount()">
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+
+  <p class="xtrim-count">{{ current?.totalElements ?? 0 }} ítems</p>
+
+  <app-pagination
+    [page]="current?.page ?? 0"
+    [totalPages]="current?.totalPages ?? 0"
+    (pageChange)="goToPage($event)"
+  />
+</div>

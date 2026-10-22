@@ -1,0 +1,66 @@
+.xtrim-admin__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.xtrim-admin__session {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* The identity of the session speaks with the quiet voice of the system:
+   the avatar is a Fomantic icon (no image, no colour it does not own),
+   the name carries the weight, and the chip keeps the role as a fact. */
+.xtrim-admin__avatar {
+  margin: 0;
+  color: var(--xtrim-muted);
+}
+
+.xtrim-admin__name {
+  font-weight: 600;
+}
+
+/* "Cerrar sesión" remains a quiet, basic button — leaving is not
+   destruction, so it wears no red and no accent, only the hairline
+   of the system and the sign-out icon that explains the button. */
+.xtrim-admin__logout .icon {
+  margin: 0 0.25rem 0 0;
+}
+
+/* The pointing menu answers the destination the visitor is in with Azul
+   Señal: the border signals (it holds 3:1 on white), the word stays the ink
+   of the system so the AA floor never rests on the accent (P27 D4).
+
+   The answer is a breath, not a cut: the underline and the word fade from
+   one destination to the next. The weight never moves — the active state is
+   the border + the ink, never a bolder word — because Fomantic's default
+   (`.active.item` at 700 against 400) made the row reflow and the tabs shift
+   on every click. The selector mirrors Fomantic's own classes so the override
+   wins the cascade instead of losing to `.ui.secondary.pointing.menu
+   .active.item` (P27 risk 1, materialised). */
+.ui.secondary.pointing.menu.xtrim-admin__menu a.item {
+  transition:
+    color 0.15s ease-out,
+    border-color 0.15s ease-out,
+    background-color 0.15s ease-out;
+}
+
+.ui.secondary.pointing.menu.xtrim-admin__menu a.item.active {
+  border-color: var(--xtrim-primary);
+  color: var(--xtrim-ink);
+  font-weight: 400;
+}
+
+/* The movement is a courtesy, never a demand: the visitor who asks for less
+   motion gets none — the tab answers instantly. (The fade of the arriving
+   room lives in the global sheet, where encapsulation cannot block the
+   router's host element; see `.xtrim-admin__content` in `styles.scss`.) */
+@media (prefers-reduced-motion: reduce) {
+  .ui.secondary.pointing.menu.xtrim-admin__menu a.item {
+    transition: none;
+  }
+}
