@@ -94,10 +94,9 @@
 
 ### 3. El sitio va lento en los móviles
 
-> **Esto ya está hecho y medido.** La fase P22 midió el sitio por primera vez, lo arregló y
-> dejó los números escritos: el Lighthouse en modo móvil pasó de **32 a 94** en la home, y el
-> CLS de **1,645 a 0**. Lo que sigue es el razonamiento, con lo que se encontró y lo que se
-> hizo.
+> **Esto ya está hecho y medido.** El sitio se midió por primera vez, se corrigió y quedaron los
+> números: Lighthouse en modo móvil pasó de **32 a 94** en la home y el CLS de **1,645 a 0**. Lo
+> que sigue es el razonamiento, con lo que se encontró y lo que se hizo.
 
 **Qué revisar primero:**
 
@@ -172,20 +171,20 @@ base de datos, sino separando lo que escribe de lo que lee.
 son diez mil ítems: son diez mil filas en `activity_events` y quizá mil leads. El catálogo —la
 tabla que más se lee— es la más pequeña.
 
-### El plan, por etapas
+### El plan
 
-**Etapa 1 — Medir (sin cambiar nada).** Las métricas que mandan: eventos por segundo, latencia del
+**Medir primero (sin cambiar nada).** Las métricas que mandan: eventos por segundo, latencia del
 `POST /api/public/events`, duración de la transacción del checkout, tamaño de la tabla de eventos y
 la tasa de errores. Con los números, el resto es una cuenta.
 
-**Etapa 2 — Quitar la carga del camino crítico.**
+**Quitar la carga del camino crítico.**
 
 - El evento de tracking se escribe **fuera** de la transacción que lo origina, con una cola
   (`REQUIRES_NEW` ya está; en producción, una cola de verdad).
 - El correo y la notificación del stock se escriben **después**, en su propia transacción, con un
   reintento. Ya es la estructura; falta el transporte.
 
-**Etapa 3 — Partir el dato.** La tabla `activity_events` es de solo inserciones y crece sin límite:
+**Partir el dato.** La tabla `activity_events` es de solo inserciones y crece sin límite:
 es una tabla de series de tiempo, no relacional. El camino es:
 
 - **Una partición por mes** (PostgreSQL lo hace de forma nativa con `PARTITION BY RANGE`).
@@ -194,13 +193,13 @@ es una tabla de series de tiempo, no relacional. El camino es:
 - Los agregados —los indicadores, el "más comprado"— se calculan en una vista materializada o en
   una tabla que se refresca por lotes.
 
-**Etapa 4 — Los lectores.** El catálogo es de solo lectura y cambia poco:
+**Los lectores.** El catálogo es de solo lectura y cambia poco:
 
 - **Redis como caché** (ya está, con cinco minutos de vida y vaciado en cada escritura).
 - Si el catálogo creciera de verdad, **una réplica de lectura** y el enrutado de las consultas de
   lectura hacia ella.
 
-**Etapa 5 — La escritura de los leads.** Diez mil capturas al día son ~0,12 por segundo: PostgreSQL
+**La escritura de los leads.** Diez mil capturas al día son ~0,12 por segundo: PostgreSQL
 de sobra. Lo que hay que fortalecer:
 
 - El **upsert por correo** atómico (`ON CONFLICT`), para que dos personas con el mismo correo no
@@ -209,7 +208,7 @@ de sobra. Lo que hay que fortalecer:
   hace idempotente la captura.
 - La **conexión**: el pool se dimensiona contra el número de instancias, no al revés.
 
-**Etapa 6 — El despliegue.** El API se escala horizontalmente: es sin estado (la sesión es el
+**El despliegue.** El API se escala horizontalmente: es sin estado (la sesión es el
 JWT, no el servidor) y el pool de conexiones se reparte entre las instancias.
 
 | Pieza | Cómo escala |

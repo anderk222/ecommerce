@@ -12,6 +12,8 @@ agregó al carrito y qué compró.
 
 **Panel:** `admin@xtrim.ec` / `admin123`
 
+**Demo:** <https://xtrim-site.onrender.com> · **API:** <https://xtrim-api.onrender.com/api/health>
+
 ---
 
 ## Cómo funciona (en 4 pasos)
@@ -303,7 +305,19 @@ el bind y poner delante TLS/dominio. `scripts/stack.sh` envuelve el ciclo comple
 API (Docker), PostgreSQL administrado y Key Value (la caché). Los pasos completos —Blueprint,
 variables, verificación y límites del plan gratuito— están en
 [`docs/despliegue.md`](docs/despliegue.md). Los secretos se configuran en el panel de Render, nunca
-en el repositorio. La URL pública del demo se añade aquí cuando el despliegue esté completado.
+en el repositorio.
+
+**Demo pública**
+
+| Qué | URL |
+| --- | --- |
+| Tienda | <https://xtrim-site.onrender.com> |
+| Panel | <https://xtrim-site.onrender.com/admin/login> |
+| API | <https://xtrim-api.onrender.com/api/health> |
+| Swagger | <https://xtrim-api.onrender.com/swagger-ui/index.html> |
+
+> Plan gratuito de Render: si el servicio lleva un rato inactivo, el primer acceso puede tardar en
+> responder.
 
 Resumen: sube el repositorio, **New + → Blueprint** en Render, elige el repo y pulsa **Apply**. El
 blueprint conecta solo las cuatro piezas; `JWT_SECRET` se genera y las credenciales de la base se
@@ -311,24 +325,65 @@ inyectan. Después se comprueban `https://<sitio>/`, `/api/health`, `/robots.txt
 
 ---
 
-## Preguntas del caso práctico (resumen)
+## Caso práctico
 
-**1. El tráfico orgánico cae un 40 %.** Primero se descarta una caída del sitio (5xx, latencia,
-despliegue roto); después se revisan Search Console, el `sitemap.xml` y el `robots.txt`. Lo más
-frecuente es una desindexación o un SSR que entrega HTML vacío.
+### El tráfico orgánico cae un 40 %
 
-**2. El formulario falla de forma intermitente.** Se separa el fallo del cliente del del servidor.
-La causa típica es la carrera del alta por correo: dos peticiones con el mismo email. Se resuelve
-con un `upsert` atómico (`INSERT … ON CONFLICT`) y sacando el tracking de la transacción.
+Lo primero que miro es si el sitio está sano, no el tráfico. Un 5xx, una latencia alta o un
+despliegue reciente pueden tirar la indexación. Reviso los logs y el último deploy, y después Search
+Console: Cobertura, Rendimiento y Acciones manuales.
 
-**3. El sitio va lento en móviles.** Se mide con Lighthouse móvil, no de escritorio, y se ataca el
-peso de CSS/JS, las fuentes y las imágenes. Aquí ya se hizo: 94/94/87 y CLS 0.
+La diferencia entre perder posiciones y perder páginas se ve ahí. Si caen las impresiones y las
+visitas a la vez, suelo encontrar URLs desindexadas o bloqueadas. Si solo baja el CTR, el problema
+está en el título o en la descripción. Comparo las páginas afectadas con las que siguen bien y reviso
+`sitemap.xml`, `robots.txt`, canonical y `noindex`.
 
-**Escalabilidad (de 100 a 10 000 leads/día).** El catálogo no crece; la actividad sí. El plan:
-eventos fuera de la transacción, partición y archivo de `activity_events`, caché del catálogo,
-`upsert` atómico e instancias sin estado.
+Para que no vuelva a pasar, el sitemap y el robots se pueden servir desde el edge, así no dependen de
+que la aplicación esté viva. También conviene una página de mantenimiento que devuelva 503 con
+`Retry-After` en vez de un 500 con HTML vacío, y una alerta si el sitemap pierde URLs. El canonical y
+el JSON-LD ya se generan en el servidor.
 
-Las respuestas completas están en [`docs/preguntas-del-caso.md`](docs/preguntas-del-caso.md).
+### El formulario falla a ratos
+
+Empiezo por separar un fallo general de uno intermitente. Si falla siempre, es el despliegue; si
+falla a ratos, hay una carrera o un recurso justo. Los logs de la ruta y el reparto entre 4xx y 5xx
+lo aclaran rápido.
+
+Aquí el sospechoso más probable es el alta del lead por correo. Dos peticiones con el mismo email a
+la vez chocan contra el índice único de `leads` y una de las dos falla. También descarto el pool de
+conexiones lleno, un *timeout* de la base y el proveedor de correo.
+
+Se arregla haciendo la captura idempotente con `INSERT … ON CONFLICT DO UPDATE` por correo. El
+tracking y la notificación salen de la transacción del lead, y el correo va con reintentos. Añado un
+identificador de correlación para poder seguir el próximo fallo en los logs.
+
+### El sitio va lento en móvil
+
+Mido con Lighthouse en móvil, no en escritorio, y empiezo por el listado, que es la página más
+pesada. Reviso LCP, CLS y qué bloquea el hilo principal. Casi siempre son scripts de terceros y CSS
+que no se usa.
+
+En este caso había jQuery y Fomantic para un desplegable que se resolvía con un `<select>` nativo.
+Eran unos 489 KB que sobraban. También había fuentes de 174 KB por peso e imágenes sin dimensiones.
+Se quitaron las dependencias, se recortaron las fuentes con métricas de *fallback*, se declararon
+tamaños y `loading="lazy"`, se dividió el JS por ruta y se cachearon los estáticos.
+
+El resultado fue 94 en la home, 94 en el listado y 87 en el detalle, con CLS 0.
+
+### De 100 a 10 000 leads al día
+
+El catálogo no crece; la actividad sí. PostgreSQL aguanta 10 000 leads diarios sin despeinarse. El
+trabajo está en sacar eventos y correo del camino crítico.
+
+- Los eventos de tracking van a una cola, fuera de la transacción del checkout.
+- El correo y los avisos de stock se procesan después, con reintentos.
+- `activity_events` se particiona por mes y solo se mantienen 90 días en caliente; lo anterior se
+  archiva.
+- El catálogo se cachea en Redis y, si hace falta, se añade una réplica de lectura.
+- La API no guarda estado, así que se escala en horizontal. El pool se ajusta por instancia.
+
+No separaría el CRM del catálogo ni me iría a microservicios. Un monolito modular con límites
+claros aguanta bastante más que 10 000 leads al día.
 
 ---
 
