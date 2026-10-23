@@ -57,15 +57,34 @@ export class CartStore {
   /**
    * Adds an item to the cart.
    *
-   * <p>It never throws: a cart that is full must not break the page.
+   * <p>It never throws: a cart that is full must not break the page. The
+   * quantity never goes above the stock that was known when the item was
+   * added — the components still speak their own refusal, and this cap keeps
+   * the invariant even when a caller forgets to ask.
    */
   add(line: Omit<CartLine, 'quantity'>, quantity = 1): void {
+    if (quantity <= 0) {
+      return;
+    }
     const lines = [...this.state()];
     const existing = lines.find((candidate) => candidate.itemId === line.itemId);
     if (existing) {
-      existing.quantity += quantity;
+      const stock = line.stock ?? existing.stock;
+      if (stock !== null && existing.quantity >= stock) {
+        return;
+      }
+      existing.quantity =
+        stock === null ? existing.quantity + quantity : Math.min(existing.quantity + quantity, stock);
+      existing.stock = stock;
     } else {
-      lines.push({ ...line, quantity });
+      const stock = line.stock;
+      if (stock !== null && stock <= 0) {
+        return;
+      }
+      lines.push({
+        ...line,
+        quantity: stock === null ? quantity : Math.min(quantity, stock),
+      });
     }
     this.write(lines);
   }

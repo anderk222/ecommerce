@@ -55,6 +55,20 @@ export class Detail {
   /** The item, once it has arrived. */
   readonly item = this.catalogApi.detail(computed(() => this.slug().get('slug') ?? ''));
 
+  /** The message of the last operation (P26): the stock refuses with a word. */
+  readonly message = signal<string | null>(null);
+
+  /** Whether the last operation was refused. */
+  readonly failed = signal(false);
+
+  /** The refusal of the read, in the same voice as the writes (P51 D4): the
+   *  one box of the screen speaks both, and the word of the operation keeps
+   *  the priority. */
+  protected readonly readError = computed(() => {
+    const error = this.item.error();
+    return error ? this.messageOf(error) : null;
+  });
+
   /** The page that sent the visitor here: the `from` state of the navigation. */
   readonly returnFrom: string | null =
     (this.router.currentNavigation ()?.extras?.state?.['from'] as string | undefined) ?? null;
@@ -133,13 +147,16 @@ export class Detail {
   /** Buys now: if the item is not a line of the cart yet, it joins first —
    *  and then the visitor is taken to the cart either way. The decision and
    *  the checkout stay one gesture, and a second click never doubles the
-   *  quantity: an item that is already in the cart is met, not added again. */
+   *  quantity: an item that is already in the cart is met, not added again.
+   *  When the stock refuses the line, the cart is not opened on a purchase
+   *  that could not happen. */
   buyNow(): void {
-    if (this.item.hasValue()) {
-      const item = this.item.value();
-      if (this.cart.quantityOf(item.id) === 0) {
-        this.addCurrentItemToCart('BUY_NOW');
-      }
+    if (!this.item.hasValue()) {
+      return;
+    }
+    const item = this.item.value();
+    if (this.cart.quantityOf(item.id) === 0 && !this.addCurrentItemToCart('BUY_NOW')) {
+      return;
     }
     void this.router.navigate(['/carrito']);
   }
@@ -147,19 +164,38 @@ export class Detail {
   /**
    * Adds the item of the page to the cart.
    *
-   * <p>The guard is the button's own: an item that is not available never
-   * joins the cart. The event keeps the truth of what happened — the item
-   * was added — and the metadata records from which of the two calls it
-   * came, so the CRM can tell them apart without a new event type.
+   * <p>The guard is the button's own: an item that is not available, or whose
+   * stock is already in the cart, never joins it again. The refusal is said
+   * out loud — a button that swallows the click teaches nothing. The event
+   * keeps the truth of what happened — the item was added — and the metadata
+   * records from which of the two calls it came, so the CRM can tell them
+   * apart without a new event type.
+   *
+   * @returns whether the line was added
    */
-  private addCurrentItemToCart(via: 'BUTTON' | 'BUY_NOW'): void {
+  private addCurrentItemToCart(via: 'BUTTON' | 'BUY_NOW'): boolean {
     if (!this.item.hasValue()) {
-      return;
+      return false;
     }
     const item = this.item.value();
-    if (!item.available) {
-      return;
+    if (item.stock === 0) {
+      this.report(`«${item.name}» no tiene stock disponible`, true);
+      return false;
     }
+    if (!item.available) {
+      this.report(`«${item.name}» no está disponible`, true);
+      return false;
+    }
+
+    const inCart = this.cart.quantityOf(item.id);
+    if (item.stock !== null && inCart >= item.stock) {
+      this.report(
+        `Ya tienes en el carrito todo el stock de «${item.name}»: ${this.stockLabel(item.stock)}`,
+        true,
+      );
+      return false;
+    }
+
     this.cart.add({
       itemId: item.id,
       slug: item.slug,
@@ -168,7 +204,26 @@ export class Detail {
       image: item.images[0] ?? null,
       stock: item.stock,
     });
+    this.report(null, false);
     this.tracker.track('ADD_TO_CART', 'CATALOG_ITEM', item.id, { quantity: 1, via });
+    return true;
+  }
+
+  /** The stock written with its noun: one unit, or however many. */
+  private stockLabel(stock: number): string {
+    return stock === 1 ? '1 unidad' : `${stock} unidades`;
+  }
+
+  /** Writes the message of the operation, with the voice of its outcome. */
+  private report(text: string | null, failed: boolean): void {
+    this.message.set(text);
+    this.failed.set(failed);
+  }
+
+  /** The word of a failed read: the server's, when it came with one. */
+  private messageOf(error: unknown): string {
+    const message = (error as { error?: { message?: string } } | null)?.error?.message;
+    return message ?? 'No pudimos cargar el ítem.';
   }
 
   /** The structured data of the item (HU-27). */

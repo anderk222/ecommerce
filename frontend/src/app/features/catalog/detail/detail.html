@@ -1,195 +1,174 @@
 <div class="ui container">
-  @if (item.hasValue()) {
-    @let product = item.value();
-    <!-- El camino de vuelta: quien llega desde una lista o desde el carrito encuentra la salida
-         sin depender del botón atrás del navegador; los formularios llevarán la misma voz. -->
-    <a class="xtrim-detail__back" [routerLink]="backHref(product.type)">
-      <i class="arrow left icon" aria-hidden="true"></i>
-      {{ backLabel(product.type) }}
-    </a>
+  
+  @if (message() ?? readError(); as text) {
+  <div class="xtrim-message" [class.is-error]="failed() || readError() !== null"
+    [attr.role]="failed() || readError() !== null ? 'alert' : 'status'" animate.enter="xtrim-message--enter"
+    animate.leave="xtrim-message--leave">
+    @if (failed() || readError() !== null) {
+    <i class="exclamation circle icon" aria-hidden="true"></i>
+    } @else {
+    <i class="check circle outline icon" aria-hidden="true"></i>
+    }
+    <span>{{ text }}</span>
+  </div>
+  }
 
-    <!-- La ficha es un solo card, el de la casa: la misma superficie del detalle del lead —
+  @if (item.hasValue()) {
+  @let product = item.value();
+  <!-- El camino de vuelta: quien llega desde una lista o desde el carrito encuentra la salida
+         sin depender del botón atrás del navegador; los formularios llevarán la misma voz. -->
+  <a class="xtrim-detail__back" [routerLink]="backHref(product.type)">
+    <i class="arrow left icon" aria-hidden="true"></i>
+    {{ backLabel(product.type) }}
+  </a>
+
+  <!-- La ficha es un solo card, el de la casa: la misma superficie del detalle del lead —
          una frontera única que alberga las secciones, cada una con su encabezado, sin
          recuadros sueltos que lean vacíos. Enmienda del cliente (2026-10-21): once columnas
          para la mirada, cinco para la decisión; y el pase de esta tarde cierra el aire vertical
          — la ficha acompaña al dinero en la columna de la decisión y la descripción cierra el
          card de ancho completo, así ninguna de las dos columnas queda menor que la otra. -->
-    <div class="ui segment xtrim-detail__card">
-      <div class="ui stackable grid xtrim-detail__grid">
-        <div class="eleven wide column xtrim-column xtrim-detail__media">
-          <div class="xtrim-detail__gallery">
-            @if (selectedImage(); as image) {
-              <img
-                class="xtrim-gallery-main"
-                [src]="image"
-                [alt]="product.name"
-                width="800"
-                height="600"
-                loading="eager"
-              />
-            } @else {
-              <!-- El cuadro nunca se mueve (HU-30): sin imagen, la proporción declarada reserva la caja. -->
-              <div class="xtrim-gallery-main xtrim-gallery-main--empty"></div>
-            }
+  <div class="ui segment xtrim-detail__card">
+    <div class="ui stackable grid xtrim-detail__grid">
+      <div class="eleven wide column xtrim-column xtrim-detail__media">
+        <div class="xtrim-detail__gallery">
+          @if (selectedImage(); as image) {
+          <img class="xtrim-gallery-main" [src]="image" [alt]="product.name" width="800" height="600" loading="eager" />
+          } @else {
+          <!-- El cuadro nunca se mueve (HU-30): sin imagen, la proporción declarada reserva la caja. -->
+          <div class="xtrim-gallery-main xtrim-gallery-main--empty"></div>
+          }
 
-            @if (product.images.length > 1) {
-              <div class="xtrim-gallery-thumbs">
-                <!-- Los pulgares son botones: la tecla llega a la galería, como al paginador. -->
-                @for (image of product.images; track image; let i = $index) {
-                  <button
-                    type="button"
-                    class="xtrim-gallery-thumb"
-                    [class.is-selected]="image === selectedImage()"
-                    (click)="select(image)"
-                    [attr.aria-label]="'Ver imagen ' + (i + 1) + ' de ' + product.images.length"
-                    [attr.aria-current]="image === selectedImage() ? 'true' : null"
-                  >
-                    <img
-                      [src]="image"
-                      alt=""
-                      width="72"
-                      height="72"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </button>
-                }
-              </div>
+          @if (product.images.length > 1) {
+          <div class="xtrim-gallery-thumbs">
+            <!-- Los pulgares son botones: la tecla llega a la galería, como al paginador. -->
+            @for (image of product.images; track image; let i = $index) {
+            <button type="button" class="xtrim-gallery-thumb" [class.is-selected]="image === selectedImage()"
+              (click)="select(image)" [attr.aria-label]="'Ver imagen ' + (i + 1) + ' de ' + product.images.length"
+              [attr.aria-current]="image === selectedImage() ? 'true' : null">
+              <img [src]="image" alt="" width="72" height="72" loading="lazy" decoding="async" />
+            </button>
             }
           </div>
+          }
         </div>
+      </div>
 
-        <div class="five wide column xtrim-column xtrim-detail__aside">
-          <!-- La decisión lleva su propio paso dentro del card: un panel de lienzo, no otra
+      <div class="five wide column xtrim-column xtrim-detail__aside">
+        <!-- La decisión lleva su propio paso dentro del card: un panel de lienzo, no otra
                caja — la frontera la pone el card, como el cuerpo del historial del lead. La
                columna entera es tan alta como la mirada, así el CTA abre en el primer viewport
                sin seguir al scroll (el sticky se retiró con este pase: con la ficha debajo ya
                no hay columna que seguir, y un panel pegado la taparía). -->
-          <div class="xtrim-detail__buy">
-            <h1 class="ui header">{{ product.name }}</h1>
+        <div class="xtrim-detail__buy">
+          <h1 class="ui header">{{ product.name }}</h1>
 
-            @if (product.categories.length) {
-              <div class="xtrim-detail__categories">
-                @for (category of product.categories; track category) {
-                  <span class="ui tiny label xtrim-chip">{{ category }}</span>
-                }
-              </div>
+          @if (product.categories.length) {
+          <div class="xtrim-detail__categories">
+            @for (category of product.categories; track category) {
+            <span class="ui tiny label xtrim-chip">{{ category }}</span>
             }
+          </div>
+          }
 
-            <!-- La línea del dinero es un par: original tachado + final, y el descuento cierra la
+          <!-- La línea del dinero es un par: original tachado + final, y el descuento cierra la
                  frase — la misma voz de la tarjeta (P24), nunca una etiqueta roja de promo. -->
-            <div class="xtrim-detail__price">
-              @if (discounted()) {
-                <span class="xtrim-price-original">{{ product.price.basePrice }}</span>
-                <span class="xtrim-price-final">{{ product.price.finalPrice }}</span>
-                <span class="xtrim-price-currency">{{ product.price.currency }}</span>
-                <span class="xtrim-price-discount">-{{ product.price.discountPercentage }}%</span>
-              } @else {
-                <span class="xtrim-price-final is-not-discounted">{{
-                  product.price.finalPrice
-                }}</span>
-                <span class="xtrim-price-currency">{{ product.price.currency }}</span>
-              }
-            </div>
+          <div class="xtrim-detail__price">
+            @if (discounted()) {
+            <span class="xtrim-price-original">{{ product.price.basePrice }}</span>
+            <span class="xtrim-price-final">{{ product.price.finalPrice }}</span>
+            <span class="xtrim-price-currency">{{ product.price.currency }}</span>
+            <span class="xtrim-price-discount">-{{ product.price.discountPercentage }}%</span>
+            } @else {
+            <span class="xtrim-price-final is-not-discounted">{{
+              product.price.finalPrice
+              }}</span>
+            <span class="xtrim-price-currency">{{ product.price.currency }}</span>
+            }
+          </div>
 
-            <!-- La disponibilidad es un hecho, no promo: la palabra lleva la información (el chip
+          <!-- La disponibilidad es un hecho, no promo: la palabra lleva la información (el chip
                  callado del sistema), y NULL jamás se disfraza de agotado. -->
-            <div class="xtrim-detail__stock">
-              @switch (product.stockState) {
-                @case ('OUT_OF_STOCK') {
-                  <span class="ui tiny label xtrim-chip">Sin stock</span>
-                }
-                @case ('LOW_STOCK') {
-                  <span class="ui tiny label xtrim-chip">Pocas unidades: {{ product.stock }}</span>
-                }
-                @case ('IN_STOCK') {
-                  <span class="ui tiny label xtrim-chip">Disponible: {{ product.stock }}</span>
-                }
-                @default {
-                  <span class="ui tiny label xtrim-chip">Servicio sin control de stock</span>
-                }
-              }
-            </div>
+          <div class="xtrim-detail__stock">
+            @switch (product.stockState) {
+            @case ('OUT_OF_STOCK') {
+            <span class="ui tiny label xtrim-chip">Sin stock</span>
+            }
+            @case ('LOW_STOCK') {
+            <span class="ui tiny label xtrim-chip">Pocas unidades: {{ product.stock }}</span>
+            }
+            @case ('IN_STOCK') {
+            <span class="ui tiny label xtrim-chip">Disponible: {{ product.stock }}</span>
+            }
+            @default {
+            <span class="ui tiny label xtrim-chip">Servicio sin control de stock</span>
+            }
+            }
+          </div>
 
-            <!-- Cuatro llamadas, un solo primario: Agregar al carrito viste Azul Señal; las
+          <!-- Cuatro llamadas, un solo primario: Agregar al carrito viste Azul Señal; las
                  otras tres son calladas — blancas con el borde trazado de la casa, la tinta del
                  texto. El grupo unido de Fomantic (la losa gris donde tres llamadas leían
                  deshabilitadas) se retiró en este pase: cada botón respira por su cuenta. -->
-            <div class="xtrim-detail__actions">
-              <button
-                class="ui primary fluid button"
-                type="button"
-                [disabled]="!purchasable()"
-                (click)="addToCart()"
-              >
-                <i class="shopping cart icon"></i>
-                Agregar al carrito
-              </button>
+          <div class="xtrim-detail__actions">
+            <button class="ui primary fluid button" type="button" [disabled]="!purchasable()" (click)="addToCart()">
+              <i class="shopping cart icon"></i>
+              Agregar al carrito
+            </button>
 
-              <button
-                class="ui fluid button xtrim-detail__action-quiet"
-                type="button"
-                [disabled]="!purchasable()"
-                (click)="buyNow()"
-              >
-                <i class="cart arrow down icon"></i>
-                Comprar ahora
-              </button>
+            <button class="ui fluid button xtrim-detail__action-quiet" type="button" [disabled]="!purchasable()"
+              (click)="buyNow()">
+              <i class="cart arrow down icon"></i>
+              Comprar ahora
+            </button>
 
-              <a
-                class="ui fluid button xtrim-detail__action-quiet"
-                routerLink="/contacto"
-                [queryParams]="{ item: product.slug }"
-              >
-                <i class="question circle icon"></i>
-                Solicitar más información
-              </a>
+            <a class="ui fluid button xtrim-detail__action-quiet" routerLink="/contacto"
+              [queryParams]="{ item: product.slug }">
+              <i class="question circle icon"></i>
+              Solicitar más información
+            </a>
 
-              <!-- El fallback humano se reconoce por su icono y su palabra, no por el verde del
+            <!-- El fallback humano se reconoce por su icono y su palabra, no por el verde del
                     dinero: la acción es azul, el verde es del precio. -->
-              <a
-                class="ui fluid button xtrim-detail__action-quiet"
-                [href]="whatsappLink()"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <i class="whatsapp icon"></i>
-                Contactar por WhatsApp
-              </a>
-            </div>
+            <a class="ui fluid button xtrim-detail__action-quiet" [href]="whatsappLink()" target="_blank"
+              rel="noopener noreferrer">
+              <i class="whatsapp icon"></i>
+              Contactar por WhatsApp
+            </a>
           </div>
+        </div>
 
-          <!-- La ficha de la decisión: la tabla sigue al dinero en la columna de la decisión —
+        <!-- La ficha de la decisión: la tabla sigue al dinero en la columna de la decisión —
                el dato que sostiene la compra junto a quien lo decide, no debajo de la mirada.
                El aire entre el panel y la tabla lo pone el panel mismo; sin línea que compita
                con su borde. -->
-          @if (product.specifications.length) {
-            <div class="xtrim-detail__specs">
-              <h2 class="ui header">Especificaciones</h2>
-              <table class="xtrim-specs">
-                <tbody>
-                  @for (specification of product.specifications; track specification.name) {
-                    <tr>
-                      <th scope="row">{{ specification.name }}</th>
-                      <td>{{ specification.value }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          }
-
+        @if (product.specifications.length) {
+        <div class="xtrim-detail__specs">
+          <h2 class="ui header">Especificaciones</h2>
+          <table class="xtrim-specs">
+            <tbody>
+              @for (specification of product.specifications; track specification.name) {
+              <tr>
+                <th scope="row">{{ specification.name }}</th>
+                <td>{{ specification.value }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
         </div>
+        }
 
-        <!-- La descripción cierra la hoja de ancho completo: la prosa a su medida (68ch) sobre
+      </div>
+
+      <!-- La descripción cierra la hoja de ancho completo: la prosa a su medida (68ch) sobre
              la línea trazada que separa la composición del relato — la última voz del card y
              nada vacío debajo. -->
-        <div class="sixteen wide column xtrim-column xtrim-detail__description">
-          <h2 class="ui header">Descripción</h2>
-          <p>{{ product.description }}</p>
-        </div>
+      <div class="sixteen wide column xtrim-column xtrim-detail__description">
+        <h2 class="ui header">Descripción</h2>
+        <p>{{ product.description }}</p>
+      </div>
 
-        <!-- El aviso de stock (HU-08, P31 D2) abandona la columna de la decisión: su formulario
+      <!-- El aviso de stock (HU-08, P31 D2) abandona la columna de la decisión: su formulario
              de tres pasos la alargaba más que la mirada, y en el estado sin stock la banda de
              la descripción caía tras un vacío enorme bajo la galería. Como banda de ancho
              completo, bajo la descripción, comparte la voz de las superficies de lienzo y la
@@ -198,29 +177,22 @@
              cuando el item ya no tiene stock — la página con stock nunca baja el formulario
              que no va a abrir, y mientras el `when` no dispara el bloque se queda vacío,
              igual que el @if que el componente lleva dentro. -->
-        <div class="sixteen wide column xtrim-column xtrim-detail__notify-band">
-          @defer (when product.stockState === 'OUT_OF_STOCK') {
-            <app-stock-notify class="xtrim-detail__notify" [item]="product" />
-          }
-        </div>
+      <div class="sixteen wide column xtrim-column xtrim-detail__notify-band">
+        @defer (when product.stockState === 'OUT_OF_STOCK') {
+        <app-stock-notify class="xtrim-detail__notify" [item]="product" />
+        }
       </div>
     </div>
+  </div>
   } @else if (item.error()) {
-    <!-- La negativa tiene voz (P51 D3): antes el fallo —o un slug que no
-         existe— era un esqueleto eterno. La caja habla con la voz de la casa
-         y deja reintentar. -->
-    <div class="xtrim-message is-error" role="alert"
-      animate.enter="xtrim-message--enter"
-      animate.leave="xtrim-message--leave"
-    >
-      <i class="exclamation circle icon" aria-hidden="true"></i>
-      <span>No pudimos cargar el ítem.</span>
-    </div>
-    <button class="ui button" type="button" (click)="item.reload()">Reintentar</button>
+  <!-- La negativa tiene voz (P51 D3): la caja de arriba la dice con la palabra
+         del servidor, en la misma voz de las escrituras (P51 D4). Aquí queda
+         la salida: reintentar sin recargar la página. -->
+  <button class="ui button" type="button" (click)="item.reload()">Reintentar</button>
 
   } @else if (item.isLoading()) {
-    <div class="ui segment">
-      <app-loading [lines]="30" label="Cargando el producto" />
-    </div>
+  <div class="ui segment">
+    <app-loading [lines]="30" label="Cargando el producto" />
+  </div>
   }
 </div>

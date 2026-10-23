@@ -37,9 +37,25 @@ const withStock = (): CatalogItemDetail => ({
   stockState: 'IN_STOCK',
 });
 
+/** The product with a single unit left: the guard of the cart. */
+const withOneLeft = (): CatalogItemDetail => ({
+  ...OUT_OF_STOCK,
+  stock: 1,
+  stockState: 'LOW_STOCK',
+});
+
+/** The stock of the cart, as the page asks it. */
+interface CartLike {
+  quantityOf: (itemId: number) => number;
+  add: () => void;
+}
+
 describe('Detail — the lazy notice of the stock (HU-08)', () => {
   /** Boots the page against the item given, with every service spoken for. */
-  const boot = async (item: CatalogItemDetail): Promise<ReturnType<typeof TestBed.createComponent<Detail>>> => {
+  const boot = async (
+    item: CatalogItemDetail,
+    cart: CartLike = { quantityOf: () => 0, add: () => undefined },
+  ): Promise<ReturnType<typeof TestBed.createComponent<Detail>>> => {
     const params = convertToParamMap({ slug: item.slug });
     await TestBed.configureTestingModule({
       imports: [Detail],
@@ -59,7 +75,7 @@ describe('Detail — the lazy notice of the stock (HU-08)', () => {
         { provide: AnonymousId, useValue: { get: () => 'anon-test-id' } },
         {
           provide: CartStore,
-          useValue: { quantityOf: () => 0, add: () => undefined },
+          useValue: cart,
         },
         { provide: WHATSAPP_NUMBER, useValue: '593999999999' },
       ],
@@ -104,5 +120,66 @@ describe('Detail — the lazy notice of the stock (HU-08)', () => {
     const notice = (fixture.nativeElement as HTMLElement).querySelector('app-stock-notify')!;
     expect(notice.querySelector<HTMLInputElement>('input#notify-name')).not.toBeNull();
     expect(notice.querySelector<HTMLInputElement>('input#notify-email')).not.toBeNull();
+  });
+
+  /** The primary call of the page: where the stock guard speaks. */
+  const addButtonOf = (fixture: Awaited<ReturnType<typeof boot>>): HTMLButtonElement =>
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '.xtrim-detail__actions .ui.primary.button',
+    )!;
+
+  it('adds the last unit and refuses the next one with a word', async () => {
+    let inCart = 0;
+    const add = vi.fn(() => {
+      inCart += 1;
+    });
+    const fixture = await boot(withOneLeft(), { quantityOf: () => inCart, add });
+
+    addButtonOf(fixture).click();
+    fixture.detectChanges();
+    expect(add).toHaveBeenCalledTimes(1);
+
+    addButtonOf(fixture).click();
+    fixture.detectChanges();
+    expect(add).toHaveBeenCalledTimes(1);
+
+    const message = (fixture.nativeElement as HTMLElement).querySelector('.xtrim-message');
+    expect(message?.textContent).toContain('todo el stock de «Térmico Alpina»: 1 unidad');
+    expect(message?.classList).toContain('is-error');
+  });
+
+  it('never adds more than the stock, whatever its size', async () => {
+    let inCart = 0;
+    const add = vi.fn(() => {
+      inCart += 1;
+    });
+    const fixture = await boot(
+      { ...OUT_OF_STOCK, stock: 10, stockState: 'IN_STOCK' },
+      { quantityOf: () => inCart, add },
+    );
+
+    // The eleventh click meets the same guard as the second one on a stock of one.
+    for (let click = 0; click < 11; click += 1) {
+      addButtonOf(fixture).click();
+      fixture.detectChanges();
+    }
+
+    expect(add).toHaveBeenCalledTimes(10);
+    const message = (fixture.nativeElement as HTMLElement).querySelector('.xtrim-message');
+    expect(message?.textContent).toContain('todo el stock de «Térmico Alpina»: 10 unidades');
+    expect(message?.classList).toContain('is-error');
+  });
+
+  it('refuses an item without stock and says why', async () => {
+    const add = vi.fn();
+    const fixture = await boot(OUT_OF_STOCK, { quantityOf: () => 0, add });
+
+    addButtonOf(fixture).click();
+    fixture.detectChanges();
+
+    expect(add).not.toHaveBeenCalled();
+    const message = (fixture.nativeElement as HTMLElement).querySelector('.xtrim-message');
+    expect(message?.textContent).toContain('«Térmico Alpina» no tiene stock disponible');
+    expect(message?.getAttribute('role')).toBe('alert');
   });
 });
