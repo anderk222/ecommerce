@@ -30,17 +30,20 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular/build": "^22.2.3",
-    "@angular/cli": "^22.2.3",
+    "@angular/build": "^22.2.4",
+    "@angular/cli": "^22.2.4",
     "@angular/compiler-cli": "^22.2.0",
     "@types/compression": "^1.8.1",
     "@types/express": "^5.0.1",
     "@types/node": "^22.12.0",
-    "fomantic-ui": "^2.9.4",
+    "fomantic-ui-css": "^2.9.4",
     "jsdom": "^30.0.0",
     "postcss": "^8.5.31",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
     "vitest": "^5.0.0"
+  },
+  "overrides": {
+    "vite": "^8.3.5"
   }
 }

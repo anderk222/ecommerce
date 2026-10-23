@@ -14,6 +14,10 @@ import { Login } from './login';
 @Component({ imports: [RouterOutlet], template: '<router-outlet />' })
 class Shell {}
 
+/** The panel the login walks to: the test only needs the door to exist. */
+@Component({ template: '' })
+class Panel {}
+
 /** The storage of the tests: an honest memory, nothing more. */
 class MemoryStorage extends StoragePort {
   private readonly map = new Map<string, string>();
@@ -36,7 +40,10 @@ describe('Login', () => {
     await TestBed.configureTestingModule({
       imports: [Shell, Login],
       providers: [
-        provideRouter([{ path: 'admin/login', component: Login }]),
+        provideRouter([
+          { path: 'admin/login', component: Login },
+          { path: 'admin', component: Panel },
+        ]),
         provideHttpClient(withInterceptors([authInterceptor])),
         provideHttpClientTesting(),
         { provide: StoragePort, useClass: MemoryStorage },

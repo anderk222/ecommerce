@@ -120,16 +120,25 @@ export class CatalogAdmin {
   private readonly discountAttempted = signal(false);
 
   /**
+   * The word of the percentage: the one of the validator, or the house's
+   * fallback when the error arrives without words of its own (D4). It is
+   * public because the parse error of `type="number"` cannot be staged in
+   * jsdom, so the spec reads the fallback straight from here.
+   */
+  discountPercentageMessage(): string {
+    return this.discountForm.percentage().errors()[0]?.message ?? 'Ingresa un número válido.';
+  }
+
+  /**
    * The word of the percentage, or null while it must stay quiet (valid, or
-   * neither touched nor attempted). The browser's parse error arrives without
-   * words of its own — the house answers it here (D4).
+   * neither touched nor attempted).
    */
   protected readonly percentageError = computed(() => {
     const field = this.discountForm.percentage();
     if (!(field.touched() || this.discountAttempted()) || !field.invalid()) {
       return null;
     }
-    return field.errors()[0]?.message ?? 'Ingresa un número válido.';
+    return this.discountPercentageMessage();
   });
 
   // ── Listing actions ───────────────────────────────────────────────────

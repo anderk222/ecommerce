@@ -21,7 +21,7 @@ import postcss from 'postcss';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = join(ROOT, 'generated');
 const OUT_FILE = join(OUT_DIR, 'fomantic.css');
-const SOURCE = join(ROOT, 'node_modules/fomantic-ui/dist/semantic.min.css');
+const SOURCE = join(ROOT, 'node_modules/fomantic-ui-css/semantic.min.css');
 
 /** The budget of the stylesheet, in bytes (requirements.md §4.1). */
 const CSS_BUDGET = 200 * 1024;
@@ -208,7 +208,7 @@ const { css, kept, dropped } = purge(original, used);
  */
 const withFonts = css.replace(
   /url\((["']?)themes\/default\/assets\/([^"')]+)\1\)/g,
-  'url($1../node_modules/fomantic-ui/dist/themes/default/assets/$2$1)',
+  'url($1../node_modules/fomantic-ui-css/themes/default/assets/$2$1)',
 );
 
 const ratio = ((withFonts.length / original.length) * 100).toFixed(1);
