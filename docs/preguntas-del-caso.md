@@ -225,8 +225,24 @@ JWT, no el servidor) y el pool de conexiones se reparte entre las instancias.
   PostgreSQL. El problema nunca es la base: es el número de **transacciones largas** que la
   atraviesan.
 - **No separaría el CRM del catálogo.** Son volúmenes distintos: uno crece, el otro no.
-- **No usaría microservicios.** Un monolito modular con fronteras claras (que es lo que es este
-  proyecto) escala hasta mucho más lejos de 10.000 leads al día, y cuesta una fracción.
+
+### Dónde sí estoy abierto a microservicios
+
+El monolito modular es el punto de partida, no un dogma. **Estoy abierto a microservicios** cuando
+haya una razón operativa: un equipo que necesita desplegar a su ritmo, un perfil de carga que pide
+escalar una pieza sola o un ciclo de vida distinto. Con las fronteras que ya tiene el proyecto, el
+corte natural es:
+
+- **El tracking de eventos.** Es de solo inserción, crece con el tráfico y ya escribe fuera de la
+  transacción del checkout: sale a un servicio con su propia cola y su propio almacén, sin tocar la
+  compra.
+- **Las notificaciones** (correo y avisos de stock). Son trabajadores con reintentos, otro ritmo de
+  despliegue y otra dependencia externa; un servicio aparte los aísla de los fallos del proveedor.
+
+Lo que **no** separaría es el catálogo de la compra, ni el CRM del catálogo: comparten transacción,
+precio y stock, y la consistencia distribuida costaría más de lo que ahorra a este volumen. La
+decisión la tomaría con métricas delante —latencia, colas, despliegues por semana—, no por moda, y
+sabiendo que cada corte añade *observabilidad* y *fallos parciales* que hoy no existen.
 
 ### El resumen
 

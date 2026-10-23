@@ -382,8 +382,13 @@ trabajo está en sacar eventos y correo del camino crítico.
 - El catálogo se cachea en Redis y, si hace falta, se añade una réplica de lectura.
 - La API no guarda estado, así que se escala en horizontal. El pool se ajusta por instancia.
 
-No separaría el CRM del catálogo ni me iría a microservicios. Un monolito modular con límites
-claros aguanta bastante más que 10 000 leads al día.
+El monolito modular es el punto de partida, no una postura cerrada: **estoy abierto a
+microservicios** cuando la operación los justifique. Con estas fronteras, el primer corte sería por
+donde ya existe —el tracking de eventos y las notificaciones—: son cargas distintas, ya viven fuera
+de la transacción del checkout y se despliegan a otro ritmo. Lo que no separaría es el catálogo de la
+compra ni el CRM del catálogo, porque comparten transacción y precio. La decisión la tomaría por
+equipo, por necesidad de escalar o desplegar una pieza sola y por el coste de la consistencia
+distribuida, nunca por moda.
 
 ---
 
