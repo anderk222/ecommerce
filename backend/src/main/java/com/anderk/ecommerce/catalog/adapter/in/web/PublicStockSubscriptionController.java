@@ -2,7 +2,8 @@ package com.anderk.ecommerce.catalog.adapter.in.web;
 
 import java.util.List;
 
-import com.anderk.ecommerce.catalog.application.StockSubscriptionService;
+import com.anderk.ecommerce.catalog.application.command.SubscribeToStockCommand;
+import com.anderk.ecommerce.catalog.application.usecases.SubscribeToStockUseCase;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -27,16 +28,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/public/stock-subscriptions")
 public class PublicStockSubscriptionController {
 
-    private final StockSubscriptionService stockSubscriptionService;
+    private final SubscribeToStockUseCase subscribeToStockUseCase;
 
-    public PublicStockSubscriptionController(StockSubscriptionService stockSubscriptionService) {
-        this.stockSubscriptionService = stockSubscriptionService;
+    public PublicStockSubscriptionController(SubscribeToStockUseCase subscribeToStockUseCase) {
+        this.subscribeToStockUseCase = subscribeToStockUseCase;
     }
 
     /** Subscribes the visitor to the notice. */
     @PostMapping
     public ResponseEntity<Void> subscribe(@Valid @RequestBody SubscriptionRequest request) {
-        this.stockSubscriptionService.subscribe(new StockSubscriptionService.SubscribeCommand(
+        this.subscribeToStockUseCase.subscribe(new SubscribeToStockCommand(
                 request.email(),
                 request.name(),
                 request.province(),

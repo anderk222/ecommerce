@@ -6,52 +6,24 @@ import java.util.Optional;
 
 import jakarta.persistence.LockModeType;
 
-import org.springframework.data.domain.Page;
+import com.anderk.ecommerce.catalog.domain.model.ItemType;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface CatalogItemJpaRepository extends JpaRepository<CatalogItemJpaEntity, Long> {
-
-    /**
-     * The search of the catalog.
-     *
-     * <p>Every filter is optional: a null parameter means "do not filter by
-     * this". The state filter is a number — 0 all, 1 active, 2 inactive,
-     * 3 deleted — because JPQL cannot compare an enum parameter with a
-     * string literal.
-     */
-    @Query("""
-            select i from CatalogItemJpaEntity i
-            where (:type is null or i.type = :type)
-              and (:state = 0
-                   or (:state = 1 and i.active = true and i.deletedAt is null)
-                   or (:state = 2 and i.active = false and i.deletedAt is null)
-                   or (:state = 3 and i.deletedAt is not null))
-              and (:search is null or i.searchText like :search)
-              and (:categorySlug is null or exists (
-                    select 1 from CatalogItemCategoryJpaEntity ic
-                    join ic.category c
-                    where ic.item = i and c.slug = :categorySlug))
-              and (:onSale = false or exists (
-                    select 1 from DiscountJpaEntity d
-                    where d.itemId = i.id
-                      and d.revokedAt is null
-                      and (d.startsAt is null or d.startsAt <= :now)
-                      and (d.endsAt is null or d.endsAt >= :now)))
-              and (:lowStockOnly = false or (i.stock is not null and i.stock <= :lowStockThreshold))
-            """)
-    Page<CatalogItemJpaEntity> search(@Param("type") com.anderk.ecommerce.catalog.domain.model.ItemType type,
-                                       @Param("state") int state,
-                                       @Param("search") String search,
-                                       @Param("categorySlug") String categorySlug,
-                                       @Param("onSale") boolean onSale,
-                                       @Param("lowStockOnly") boolean lowStockOnly,
-                                       @Param("lowStockThreshold") int lowStockThreshold,
-                                       @Param("now") Instant now,
-                                       Pageable pageable);
+/**
+ * The Spring Data repository of the catalog items.
+ *
+ * <p>The search is not declared here: {@link JpaSpecificationExecutor} runs the
+ * {@code Specification} that {@link CatalogItemSpecifications} builds from the
+ * criteria. What stays in this interface are the fixed queries.
+ */
+public interface CatalogItemJpaRepository
+        extends JpaRepository<CatalogItemJpaEntity, Long>, JpaSpecificationExecutor<CatalogItemJpaEntity> {
 
     /** The item with that slug, whatever its state. */
     Optional<CatalogItemJpaEntity> findBySlug(String slug);
@@ -83,7 +55,7 @@ public interface CatalogItemJpaRepository extends JpaRepository<CatalogItemJpaEn
     @Query("select i from CatalogItemJpaEntity i where i.type = :type and i.active = true "
             + "and i.deletedAt is null order by i.createdAt desc, i.id desc")
     List<CatalogItemJpaEntity> listByType(
-            @Param("type") com.anderk.ecommerce.catalog.domain.model.ItemType type,
+            @Param("type") ItemType type,
             Pageable pageable);
 
     /**

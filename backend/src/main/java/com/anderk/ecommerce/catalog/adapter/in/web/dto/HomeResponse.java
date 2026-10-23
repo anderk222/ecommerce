@@ -2,6 +2,8 @@ package com.anderk.ecommerce.catalog.adapter.in.web.dto;
 
 import java.util.List;
 
+import com.anderk.ecommerce.catalog.adapter.in.web.dto.catalog.CatalogItemSummaryResponse;
+
 /**
  * The content of the home page.
  *

@@ -4,20 +4,24 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
-import com.anderk.ecommerce.catalog.adapter.in.web.dto.CatalogItemAdminDetailResponse;
-import com.anderk.ecommerce.catalog.adapter.in.web.dto.CatalogItemAdminResponse;
-import com.anderk.ecommerce.catalog.adapter.in.web.dto.CatalogItemDetailResponse;
-import com.anderk.ecommerce.catalog.application.CatalogCommandService;
-import com.anderk.ecommerce.catalog.application.CatalogQueryService;
+import com.anderk.ecommerce.catalog.adapter.in.web.dto.catalog.AdminCatalogSearchRequest;
+import com.anderk.ecommerce.catalog.adapter.in.web.dto.catalog.CatalogItemAdminDetailResponse;
+import com.anderk.ecommerce.catalog.adapter.in.web.dto.catalog.CatalogItemAdminResponse;
+import com.anderk.ecommerce.catalog.adapter.in.web.dto.catalog.CatalogItemDetailResponse;
 import com.anderk.ecommerce.catalog.application.command.ApplyDiscountCommand;
 import com.anderk.ecommerce.catalog.application.command.CreateCatalogItemCommand;
 import com.anderk.ecommerce.catalog.application.command.UpdateCatalogItemCommand;
+import com.anderk.ecommerce.catalog.application.usecases.ApplyDiscountUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.CreateCatalogItemUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.DeactivateCatalogItemUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.DeleteCatalogItemUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.GetAdminCatalogItemUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.ReactivateCatalogItemUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.RevokeDiscountUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.SearchAdminCatalogUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.UpdateCatalogItemUseCase;
 import com.anderk.ecommerce.catalog.domain.model.ItemType;
 import com.anderk.ecommerce.catalog.domain.model.Specification;
-import com.anderk.ecommerce.catalog.domain.port.CatalogSearchCriteria;
-import com.anderk.ecommerce.catalog.domain.port.CatalogSort;
-import com.anderk.ecommerce.catalog.domain.port.ItemStateFilter;
-import com.anderk.ecommerce.domain.pagination.PageRequestDto;
 import com.anderk.ecommerce.domain.pagination.PageResponse;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -50,53 +54,59 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin/catalog")
 public class AdminCatalogController {
 
-    private final CatalogQueryService catalogQueryService;
+    private final SearchAdminCatalogUseCase searchAdminCatalogUseCase;
 
-    private final CatalogCommandService catalogCommandService;
+    private final GetAdminCatalogItemUseCase getAdminCatalogItemUseCase;
 
-    public AdminCatalogController(CatalogQueryService catalogQueryService,
-                                  CatalogCommandService catalogCommandService) {
-        this.catalogQueryService = catalogQueryService;
-        this.catalogCommandService = catalogCommandService;
+    private final CreateCatalogItemUseCase createCatalogItemUseCase;
+
+    private final UpdateCatalogItemUseCase updateCatalogItemUseCase;
+
+    private final DeactivateCatalogItemUseCase deactivateCatalogItemUseCase;
+
+    private final ReactivateCatalogItemUseCase reactivateCatalogItemUseCase;
+
+    private final DeleteCatalogItemUseCase deleteCatalogItemUseCase;
+
+    private final ApplyDiscountUseCase applyDiscountUseCase;
+
+    private final RevokeDiscountUseCase revokeDiscountUseCase;
+
+    public AdminCatalogController(SearchAdminCatalogUseCase searchAdminCatalogUseCase,
+                                  GetAdminCatalogItemUseCase getAdminCatalogItemUseCase,
+                                  CreateCatalogItemUseCase createCatalogItemUseCase,
+                                  UpdateCatalogItemUseCase updateCatalogItemUseCase,
+                                  DeactivateCatalogItemUseCase deactivateCatalogItemUseCase,
+                                  ReactivateCatalogItemUseCase reactivateCatalogItemUseCase,
+                                  DeleteCatalogItemUseCase deleteCatalogItemUseCase,
+                                  ApplyDiscountUseCase applyDiscountUseCase,
+                                  RevokeDiscountUseCase revokeDiscountUseCase) {
+        this.searchAdminCatalogUseCase = searchAdminCatalogUseCase;
+        this.getAdminCatalogItemUseCase = getAdminCatalogItemUseCase;
+        this.createCatalogItemUseCase = createCatalogItemUseCase;
+        this.updateCatalogItemUseCase = updateCatalogItemUseCase;
+        this.deactivateCatalogItemUseCase = deactivateCatalogItemUseCase;
+        this.reactivateCatalogItemUseCase = reactivateCatalogItemUseCase;
+        this.deleteCatalogItemUseCase = deleteCatalogItemUseCase;
+        this.applyDiscountUseCase = applyDiscountUseCase;
+        this.revokeDiscountUseCase = revokeDiscountUseCase;
     }
 
     /**
-     * The unified listing of the administration (HU-14).
-     *
-     * @param type {@code PRODUCT}, {@code SERVICE}, or nothing for both
-     * @param q the free text
-     * @param category the slug of the category
-     * @param sort the ordering
-     * @param state {@code ALL}, {@code ACTIVE}, {@code INACTIVE} or {@code DELETED}
-     * @param page the 0-based page number
-     * @param size the page size
+     * The unified listing of the administration (HU-14). The parameters are
+     * described in {@link AdminCatalogSearchRequest}.
      */
     @GetMapping
-    public PageResponse<CatalogItemAdminResponse> list(
-            @RequestParam(required = false) String type,
-            @RequestParam(name = "q", required = false) String q,
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) String sort,
-            @RequestParam(defaultValue = "ALL") String state,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(required = false) Integer size) {
-
-        CatalogSearchCriteria criteria = CatalogSearchCriteria.administration(
-                q,
-                parseType(type),
-                blankToNull(category),
-                parseSort(sort),
-                parseState(state));
-
-        return this.catalogQueryService
-                .searchAdmin(criteria, PageRequestDto.of(page, size))
+    public PageResponse<CatalogItemAdminResponse> list(AdminCatalogSearchRequest request) {
+        return this.searchAdminCatalogUseCase
+                .search(request.toCriteria(), request.toPageRequest())
                 .map(CatalogItemAdminResponse::of);
     }
 
     /** Reads an item for its edition (HU-16), whatever its state. */
     @GetMapping("/{id}")
     public CatalogItemAdminDetailResponse get(@PathVariable Long id) {
-        return CatalogItemAdminDetailResponse.of(this.catalogQueryService.getAdminById(id));
+        return CatalogItemAdminDetailResponse.of(this.getAdminCatalogItemUseCase.getById(id));
     }
 
     /** Creates an item (HU-15). */
@@ -104,7 +114,7 @@ public class AdminCatalogController {
     public ResponseEntity<CatalogItemDetailResponse> create(
             @Valid @RequestBody CatalogItemRequest request) {
         CatalogItemDetailResponse created = CatalogApiMapper.toResponse(
-                this.catalogCommandService.create(request.toCreateCommand()));
+                this.createCatalogItemUseCase.create(request.toCreateCommand()));
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
@@ -113,13 +123,13 @@ public class AdminCatalogController {
     public CatalogItemDetailResponse update(@PathVariable Long id,
                                             @Valid @RequestBody CatalogItemRequest request) {
         return CatalogApiMapper.toResponse(
-                this.catalogCommandService.update(id, request.toUpdateCommand()));
+                this.updateCatalogItemUseCase.update(id, request.toUpdateCommand()));
     }
 
     /** Logically deletes an item (HU-18). */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        this.catalogCommandService.delete(id);
+        this.deleteCatalogItemUseCase.delete(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -132,9 +142,9 @@ public class AdminCatalogController {
     public ResponseEntity<Void> setActive(@PathVariable Long id,
                                            @RequestParam boolean active) {
         if (active) {
-            this.catalogCommandService.reactivate(id);
+            this.reactivateCatalogItemUseCase.reactivate(id);
         } else {
-            this.catalogCommandService.deactivate(id);
+            this.deactivateCatalogItemUseCase.deactivate(id);
         }
         return ResponseEntity.noContent().build();
     }
@@ -143,7 +153,7 @@ public class AdminCatalogController {
     @PutMapping("/{id}/discount")
     public ResponseEntity<Void> applyDiscount(@PathVariable Long id,
                                               @Valid @RequestBody DiscountRequest request) {
-        this.catalogCommandService.applyDiscount(id, new ApplyDiscountCommand(
+        this.applyDiscountUseCase.apply(id, new ApplyDiscountCommand(
                 request.percentage(), request.startsAt(), request.endsAt()));
         return ResponseEntity.noContent().build();
     }
@@ -151,7 +161,7 @@ public class AdminCatalogController {
     /** Revokes the discount in force of an item (HU-19). */
     @DeleteMapping("/{id}/discount")
     public ResponseEntity<Void> revokeDiscount(@PathVariable Long id) {
-        this.catalogCommandService.revokeDiscount(id);
+        this.revokeDiscountUseCase.revoke(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -211,44 +221,5 @@ public class AdminCatalogController {
             @JsonFormat(pattern = "YYYY-mm-dd")
             Instant startsAt,
             Instant endsAt) {
-    }
-
-    // --- the parsing of the parameters --------------------------------------
-
-    private ItemType parseType(String type) {
-        if (blankToNull(type) == null) {
-            return null;
-        }
-        try {
-            return ItemType.valueOf(type.trim().toUpperCase(java.util.Locale.ROOT));
-        } catch (IllegalArgumentException exception) {
-            return null;
-        }
-    }
-
-    private CatalogSort parseSort(String sort) {
-        if (blankToNull(sort) == null) {
-            return CatalogSort.NEWEST;
-        }
-        try {
-            return CatalogSort.valueOf(sort.trim().toUpperCase(java.util.Locale.ROOT));
-        } catch (IllegalArgumentException exception) {
-            return CatalogSort.NEWEST;
-        }
-    }
-
-    private ItemStateFilter parseState(String state) {
-        if (blankToNull(state) == null) {
-            return ItemStateFilter.ALL;
-        }
-        try {
-            return ItemStateFilter.valueOf(state.trim().toUpperCase(java.util.Locale.ROOT));
-        } catch (IllegalArgumentException exception) {
-            return ItemStateFilter.ALL;
-        }
-    }
-
-    private String blankToNull(String value) {
-        return value == null || value.isBlank() ? null : value.trim();
     }
 }

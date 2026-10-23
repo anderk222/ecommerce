@@ -4,11 +4,12 @@ import java.math.BigDecimal;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+
 import com.anderk.ecommerce.lead.domain.model.Lead;
 import com.anderk.ecommerce.lead.domain.model.enums.LeadOutcome;
 import com.anderk.ecommerce.lead.domain.model.enums.LeadStatus;
-import com.anderk.ecommerce.lead.domain.port.LeadSearchCriteria;
-import com.anderk.ecommerce.lead.domain.port.LeadSearchRepository;
+import com.anderk.ecommerce.lead.domain.port.LeadRepository;
+import com.anderk.ecommerce.lead.domain.search.LeadSearchCriteria;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,15 +19,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class CalculateLeadKpiUseCaseImpl implements CalculateLeadKpiUseCase {
 
-    private final LeadSearchRepository leadSearchRepository;
+    private final LeadRepository leadRepository;
 
-    public CalculateLeadKpiUseCaseImpl(LeadSearchRepository leadSearchRepository) {
-        this.leadSearchRepository = leadSearchRepository;
+    public CalculateLeadKpiUseCaseImpl(LeadRepository leadRepository) {
+        this.leadRepository = leadRepository;
     }
 
     @Override
     public CalculateLeadKpiUseCaseResult calculate(CalculateLeadKpiUseCaseCommand command) {
-        List<Lead> leads = this.leadSearchRepository.findAll(new LeadSearchCriteria(
+        List<Lead> leads = this.leadRepository.findAll(new LeadSearchCriteria(
                 null, null, null, null,
                 command == null ? null : command.from(),
                 command == null ? null : command.to()));

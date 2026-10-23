@@ -3,8 +3,8 @@ package com.anderk.ecommerce.catalog.adapter.in.web;
 import java.util.List;
 
 import com.anderk.ecommerce.catalog.application.view.CategoryView;
-import com.anderk.ecommerce.catalog.adapter.in.web.dto.CatalogItemDetailResponse;
-import com.anderk.ecommerce.catalog.adapter.in.web.dto.CatalogItemSummaryResponse;
+import com.anderk.ecommerce.catalog.adapter.in.web.dto.catalog.CatalogItemDetailResponse;
+import com.anderk.ecommerce.catalog.adapter.in.web.dto.catalog.CatalogItemSummaryResponse;
 import com.anderk.ecommerce.catalog.adapter.in.web.dto.CategoryResponse;
 import com.anderk.ecommerce.catalog.adapter.in.web.dto.HomeResponse;
 import com.anderk.ecommerce.catalog.adapter.in.web.dto.PriceResponse;

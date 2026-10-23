@@ -5,13 +5,11 @@ import java.util.List;
 import com.anderk.ecommerce.lead.domain.model.LeadNote;
 import com.anderk.ecommerce.lead.domain.port.LeadNoteRepository;
 
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The output adapter of the notes.
  */
-@Component
 @Transactional
 public class JpaLeadNoteRepositoryAdapter implements LeadNoteRepository {
 

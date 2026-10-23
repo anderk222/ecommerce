@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.anderk.ecommerce.catalog.application.CatalogQueryService;
+import com.anderk.ecommerce.catalog.application.usecases.GetCatalogItemBySlugUseCase;
 import com.anderk.ecommerce.catalog.application.view.PriceView;
 import com.anderk.ecommerce.catalog.domain.model.CatalogItem;
 import com.anderk.ecommerce.catalog.domain.port.CatalogRepository;
@@ -39,7 +39,7 @@ public class CheckoutUseCaseImpl implements CheckoutUseCase {
 
     private final CatalogRepository catalogRepository;
 
-    private final CatalogQueryService catalogQueryService;
+    private final GetCatalogItemBySlugUseCase getCatalogItemBySlugUseCase;
 
     private final CaptureLeadUseCase leadCaptureService;
 
@@ -48,12 +48,12 @@ public class CheckoutUseCaseImpl implements CheckoutUseCase {
     private final TrackActivityUseCase activityTracker;
 
     public CheckoutUseCaseImpl(CatalogRepository catalogRepository,
-                                CatalogQueryService catalogQueryService,
+                                GetCatalogItemBySlugUseCase getCatalogItemBySlugUseCase,
                                 CaptureLeadUseCase leadCaptureService,
                                 OrderRepository orderRepository,
                                 TrackActivityUseCase activityTracker) {
         this.catalogRepository = catalogRepository;
-        this.catalogQueryService = catalogQueryService;
+        this.getCatalogItemBySlugUseCase = getCatalogItemBySlugUseCase;
         this.leadCaptureService = leadCaptureService;
         this.orderRepository = orderRepository;
         this.activityTracker = activityTracker;
@@ -75,7 +75,7 @@ public class CheckoutUseCaseImpl implements CheckoutUseCase {
 
             item.ensurePublished();
 
-            PriceView breakdown = this.catalogQueryService.getPublicBySlug(item.slug().value()).price();
+            PriceView breakdown = this.getCatalogItemBySlugUseCase.getBySlug(item.slug().value()).price();
 
             // The stock is discounted through the entity, so the change is
             // written in the same transaction as the order (tech-stack 2.3).

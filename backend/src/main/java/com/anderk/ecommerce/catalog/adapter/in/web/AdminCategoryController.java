@@ -2,9 +2,11 @@ package com.anderk.ecommerce.catalog.adapter.in.web;
 
 import java.util.List;
 
-import com.anderk.ecommerce.catalog.application.CategoryCommandService;
 import com.anderk.ecommerce.catalog.adapter.in.web.dto.CategoryResponse;
-import com.anderk.ecommerce.catalog.application.CatalogQueryService;
+import com.anderk.ecommerce.catalog.application.usecases.CreateCategoryUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.DeleteCategoryUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.ListCategoriesUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.UpdateCategoryUseCase;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -30,34 +32,42 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin/categories")
 public class AdminCategoryController {
 
-    private final CatalogQueryService catalogQueryService;
+    private final ListCategoriesUseCase listCategoriesUseCase;
 
-    private final CategoryCommandService categoryCommandService;
+    private final CreateCategoryUseCase createCategoryUseCase;
 
-    public AdminCategoryController(CatalogQueryService catalogQueryService,
-                                   CategoryCommandService categoryCommandService) {
-        this.catalogQueryService = catalogQueryService;
-        this.categoryCommandService = categoryCommandService;
+    private final UpdateCategoryUseCase updateCategoryUseCase;
+
+    private final DeleteCategoryUseCase deleteCategoryUseCase;
+
+    public AdminCategoryController(ListCategoriesUseCase listCategoriesUseCase,
+                                   CreateCategoryUseCase createCategoryUseCase,
+                                   UpdateCategoryUseCase updateCategoryUseCase,
+                                   DeleteCategoryUseCase deleteCategoryUseCase) {
+        this.listCategoriesUseCase = listCategoriesUseCase;
+        this.createCategoryUseCase = createCategoryUseCase;
+        this.updateCategoryUseCase = updateCategoryUseCase;
+        this.deleteCategoryUseCase = deleteCategoryUseCase;
     }
 
     /** Every category, with the number of published items it holds. */
     @GetMapping
     public List<CategoryResponse> list() {
-        return CatalogApiMapper.toResponses(this.catalogQueryService.listCategories());
+        return CatalogApiMapper.toResponses(this.listCategoriesUseCase.list());
     }
 
     /** Creates a category. The slug is generated and is unique. */
     @PostMapping
     public ResponseEntity<CategoryResponse> create(@Valid @RequestBody CategoryRequest request) {
         CategoryResponse created = CatalogApiMapper.toResponse(
-                this.categoryCommandService.create(request.name()));
+                this.createCategoryUseCase.create(request.name()));
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     /** Renames a category. */
     @PutMapping("/{id}")
     public CategoryResponse update(@PathVariable Long id, @Valid @RequestBody CategoryRequest request) {
-        return CatalogApiMapper.toResponse(this.categoryCommandService.update(id, request.name()));
+        return CatalogApiMapper.toResponse(this.updateCategoryUseCase.update(id, request.name()));
     }
 
     /**
@@ -68,7 +78,7 @@ public class AdminCategoryController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        this.categoryCommandService.delete(id);
+        this.deleteCategoryUseCase.delete(id);
         return ResponseEntity.noContent().build();
     }
 

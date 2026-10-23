@@ -7,14 +7,46 @@ import com.anderk.ecommerce.catalog.adapter.out.persistence.category.CategoryJpa
 import com.anderk.ecommerce.catalog.adapter.out.persistence.category.JpaCategoryRepositoryAdapter;
 import com.anderk.ecommerce.catalog.adapter.out.persistence.discount.DiscountJpaRepository;
 import com.anderk.ecommerce.catalog.adapter.out.persistence.discount.JpaDiscountRepositoryAdapter;
-import com.anderk.ecommerce.catalog.application.CatalogCommandService;
-import com.anderk.ecommerce.catalog.application.CatalogCommandServiceImpl;
-import com.anderk.ecommerce.catalog.application.CatalogQueryService;
-import com.anderk.ecommerce.catalog.application.CatalogQueryServiceImpl;
-import com.anderk.ecommerce.catalog.application.CategoryCommandService;
-import com.anderk.ecommerce.catalog.application.CategoryCommandServiceImpl;
-import com.anderk.ecommerce.catalog.application.StockSubscriptionService;
-import com.anderk.ecommerce.catalog.application.StockSubscriptionServiceImpl;
+import com.anderk.ecommerce.catalog.application.usecases.ApplyDiscountUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.ApplyDiscountUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.CatalogItemFactory;
+import com.anderk.ecommerce.catalog.application.usecases.CatalogViewMapper;
+import com.anderk.ecommerce.catalog.application.usecases.CreateCatalogItemUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.CreateCatalogItemUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.CreateCategoryUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.CreateCategoryUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.DeactivateCatalogItemUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.DeactivateCatalogItemUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.DeleteCatalogItemUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.DeleteCatalogItemUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.DeleteCategoryUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.DeleteCategoryUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.GetAdminCatalogItemUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.GetAdminCatalogItemUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.GetCatalogItemBySlugUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.GetCatalogItemBySlugUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.GetCategoryBySlugUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.GetCategoryBySlugUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.GetHomeContentUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.GetHomeContentUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.ListActiveSlugsUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.ListActiveSlugsUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.ListCategoriesUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.ListCategoriesUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.ReactivateCatalogItemUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.ReactivateCatalogItemUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.RevokeDiscountUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.RevokeDiscountUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.SearchAdminCatalogUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.SearchAdminCatalogUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.SearchCatalogUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.SearchCatalogUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.SubscribeToStockUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.SubscribeToStockUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.UpdateCatalogItemUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.UpdateCatalogItemUseCaseImpl;
+import com.anderk.ecommerce.catalog.application.usecases.UpdateCategoryUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.UpdateCategoryUseCaseImpl;
 import com.anderk.ecommerce.catalog.domain.policy.PercentagePricingPolicy;
 import com.anderk.ecommerce.catalog.domain.policy.PricingPolicy;
 import com.anderk.ecommerce.catalog.domain.policy.StockPolicy;
@@ -69,36 +101,140 @@ public class CatalogConfig {
     }
 
     @Bean
-    CatalogCommandService catalogCommandService(
+    CatalogViewMapper catalogViewMapper(PricingPolicy pricingPolicy, StockPolicy stockPolicy) {
+        return new CatalogViewMapper(pricingPolicy, stockPolicy);
+    }
+
+    @Bean
+    CatalogItemFactory catalogItemFactory(CatalogRepository catalogRepository,
+                                          CategoryRepository categoryRepository) {
+        return new CatalogItemFactory(catalogRepository, categoryRepository);
+    }
+
+    // --- the writes of the catalogue ----------------------------------------
+
+    @Bean
+    CreateCatalogItemUseCase createCatalogItemUseCase(
             CatalogRepository catalogRepository,
-            CategoryRepository categoryRepository,
-            DiscountRepository discountRepository,
-            PricingPolicy pricingPolicy,
+            CatalogItemFactory itemFactory,
+            CatalogViewMapper viewMapper) {
+        return new CreateCatalogItemUseCaseImpl(catalogRepository, itemFactory, viewMapper);
+    }
+
+    @Bean
+    UpdateCatalogItemUseCase updateCatalogItemUseCase(
+            CatalogRepository catalogRepository,
+            CatalogItemFactory itemFactory,
+            CatalogViewMapper viewMapper,
             DomainEventPublisher eventPublisher) {
-        return new CatalogCommandServiceImpl(catalogRepository, categoryRepository, discountRepository,
-                pricingPolicy, eventPublisher);
+        return new UpdateCatalogItemUseCaseImpl(catalogRepository, itemFactory, viewMapper, eventPublisher);
     }
 
     @Bean
-    CatalogQueryService catalogQueryService(
-            CatalogRepository catalogRepository,
-            CategoryRepository categoryRepository,
-            DiscountRepository discountRepository,
-            PricingPolicy pricingPolicy,
-            StockPolicy stockPolicy) {
-        return new CatalogQueryServiceImpl(catalogRepository, categoryRepository, discountRepository,
-                pricingPolicy, stockPolicy);
+    DeactivateCatalogItemUseCase deactivateCatalogItemUseCase(CatalogRepository catalogRepository) {
+        return new DeactivateCatalogItemUseCaseImpl(catalogRepository);
     }
 
     @Bean
-    CategoryCommandService categoryCommandService(CategoryRepository categoryRepository) {
-        return new CategoryCommandServiceImpl(categoryRepository);
+    ReactivateCatalogItemUseCase reactivateCatalogItemUseCase(CatalogRepository catalogRepository) {
+        return new ReactivateCatalogItemUseCaseImpl(catalogRepository);
     }
 
     @Bean
-    StockSubscriptionService stockSubscriptionService(
+    DeleteCatalogItemUseCase deleteCatalogItemUseCase(CatalogRepository catalogRepository) {
+        return new DeleteCatalogItemUseCaseImpl(catalogRepository);
+    }
+
+    @Bean
+    ApplyDiscountUseCase applyDiscountUseCase(CatalogRepository catalogRepository,
+                                              DiscountRepository discountRepository) {
+        return new ApplyDiscountUseCaseImpl(catalogRepository, discountRepository);
+    }
+
+    @Bean
+    RevokeDiscountUseCase revokeDiscountUseCase(CatalogRepository catalogRepository,
+                                                DiscountRepository discountRepository) {
+        return new RevokeDiscountUseCaseImpl(catalogRepository, discountRepository);
+    }
+
+    // --- the reads of the catalogue -----------------------------------------
+
+    @Bean
+    SearchCatalogUseCase searchCatalogUseCase(CatalogRepository catalogRepository,
+                                              DiscountRepository discountRepository,
+                                              CatalogViewMapper viewMapper) {
+        return new SearchCatalogUseCaseImpl(catalogRepository, discountRepository, viewMapper);
+    }
+
+    @Bean
+    SearchAdminCatalogUseCase searchAdminCatalogUseCase(CatalogRepository catalogRepository,
+                                                        DiscountRepository discountRepository,
+                                                        CatalogViewMapper viewMapper) {
+        return new SearchAdminCatalogUseCaseImpl(catalogRepository, discountRepository, viewMapper);
+    }
+
+    @Bean
+    GetCatalogItemBySlugUseCase getCatalogItemBySlugUseCase(CatalogRepository catalogRepository,
+                                                            DiscountRepository discountRepository,
+                                                            CatalogViewMapper viewMapper) {
+        return new GetCatalogItemBySlugUseCaseImpl(catalogRepository, discountRepository, viewMapper);
+    }
+
+    @Bean
+    GetAdminCatalogItemUseCase getAdminCatalogItemUseCase(CatalogRepository catalogRepository,
+                                                          CatalogViewMapper viewMapper) {
+        return new GetAdminCatalogItemUseCaseImpl(catalogRepository, viewMapper);
+    }
+
+    @Bean
+    GetHomeContentUseCase getHomeContentUseCase(CatalogRepository catalogRepository,
+                                                DiscountRepository discountRepository,
+                                                CatalogViewMapper viewMapper) {
+        return new GetHomeContentUseCaseImpl(catalogRepository, discountRepository, viewMapper);
+    }
+
+    @Bean
+    ListActiveSlugsUseCase listActiveSlugsUseCase(CatalogRepository catalogRepository) {
+        return new ListActiveSlugsUseCaseImpl(catalogRepository);
+    }
+
+    @Bean
+    ListCategoriesUseCase listCategoriesUseCase(CategoryRepository categoryRepository,
+                                                CatalogViewMapper viewMapper) {
+        return new ListCategoriesUseCaseImpl(categoryRepository, viewMapper);
+    }
+
+    @Bean
+    GetCategoryBySlugUseCase getCategoryBySlugUseCase(CategoryRepository categoryRepository,
+                                                      CatalogViewMapper viewMapper) {
+        return new GetCategoryBySlugUseCaseImpl(categoryRepository, viewMapper);
+    }
+
+    // --- the writes of the categories ---------------------------------------
+
+    @Bean
+    CreateCategoryUseCase createCategoryUseCase(CategoryRepository categoryRepository,
+                                                CatalogViewMapper viewMapper) {
+        return new CreateCategoryUseCaseImpl(categoryRepository, viewMapper);
+    }
+
+    @Bean
+    UpdateCategoryUseCase updateCategoryUseCase(CategoryRepository categoryRepository,
+                                                CatalogViewMapper viewMapper) {
+        return new UpdateCategoryUseCaseImpl(categoryRepository, viewMapper);
+    }
+
+    @Bean
+    DeleteCategoryUseCase deleteCategoryUseCase(CategoryRepository categoryRepository) {
+        return new DeleteCategoryUseCaseImpl(categoryRepository);
+    }
+
+    // --- the subscriptions of the stock -------------------------------------
+
+    @Bean
+    SubscribeToStockUseCase subscribeToStockUseCase(
             StockSubscriptionRepository subscriptionRepository,
             CaptureLeadUseCase leadCaptureService) {
-        return new StockSubscriptionServiceImpl(subscriptionRepository, leadCaptureService);
+        return new SubscribeToStockUseCaseImpl(subscriptionRepository, leadCaptureService);
     }
 }

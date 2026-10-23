@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.anderk.ecommerce.catalog.application.CatalogQueryService;
+import com.anderk.ecommerce.catalog.application.usecases.GetCatalogItemBySlugUseCase;
 import com.anderk.ecommerce.catalog.domain.port.CatalogRepository;
 import com.anderk.ecommerce.lead.application.usecases.CaptureLeadUseCase;
 import com.anderk.ecommerce.order.application.usecase.CheckoutUseCase;
@@ -18,11 +18,11 @@ public class OrderUseCasesConfig {
     @Bean
     CheckoutUseCase checkoutUseCase(
             @Autowired CatalogRepository catalogRepository,
-            @Autowired CatalogQueryService catalogQueryService,
+            @Autowired GetCatalogItemBySlugUseCase getCatalogItemBySlugUseCase,
             @Autowired CaptureLeadUseCase leadCaptureService,
             @Autowired OrderRepository orderRepository,
             @Autowired TrackActivityUseCase activityTracker
     ){
-        return new CheckoutUseCaseImpl(catalogRepository, catalogQueryService, leadCaptureService, orderRepository, activityTracker);
+        return new CheckoutUseCaseImpl(catalogRepository, getCatalogItemBySlugUseCase, leadCaptureService, orderRepository, activityTracker);
     }
 }

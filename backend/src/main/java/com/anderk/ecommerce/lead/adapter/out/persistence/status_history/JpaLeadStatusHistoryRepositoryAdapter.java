@@ -5,13 +5,11 @@ import java.util.List;
 import com.anderk.ecommerce.lead.domain.model.LeadStatusHistory;
 import com.anderk.ecommerce.lead.domain.port.LeadStatusHistoryRepository;
 
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The output adapter of the history of the states.
  */
-@Component
 @Transactional
 public class JpaLeadStatusHistoryRepositoryAdapter implements LeadStatusHistoryRepository {
 

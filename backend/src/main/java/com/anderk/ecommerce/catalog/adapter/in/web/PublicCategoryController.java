@@ -3,7 +3,8 @@ package com.anderk.ecommerce.catalog.adapter.in.web;
 import java.util.List;
 
 import com.anderk.ecommerce.catalog.adapter.in.web.dto.CategoryResponse;
-import com.anderk.ecommerce.catalog.application.CatalogQueryService;
+import com.anderk.ecommerce.catalog.application.usecases.GetCategoryBySlugUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.ListCategoriesUseCase;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,15 +18,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/public/categories")
 public class PublicCategoryController {
 
-    private final CatalogQueryService catalogQueryService;
+    private final ListCategoriesUseCase listCategoriesUseCase;
 
-    public PublicCategoryController(CatalogQueryService catalogQueryService) {
-        this.catalogQueryService = catalogQueryService;
+    private final GetCategoryBySlugUseCase getCategoryBySlugUseCase;
+
+    public PublicCategoryController(ListCategoriesUseCase listCategoriesUseCase,
+                                    GetCategoryBySlugUseCase getCategoryBySlugUseCase) {
+        this.listCategoriesUseCase = listCategoriesUseCase;
+        this.getCategoryBySlugUseCase = getCategoryBySlugUseCase;
     }
 
     @GetMapping
     public List<CategoryResponse> categories() {
-        return CatalogApiMapper.toResponses(this.catalogQueryService.listCategories());
+        return CatalogApiMapper.toResponses(this.listCategoriesUseCase.list());
     }
 
     /**
@@ -34,6 +39,6 @@ public class PublicCategoryController {
      */
     @GetMapping("/{slug}")
     public CategoryResponse category(@PathVariable String slug) {
-        return CatalogApiMapper.toResponse(this.catalogQueryService.getCategoryBySlug(slug));
+        return CatalogApiMapper.toResponse(this.getCategoryBySlugUseCase.getBySlug(slug));
     }
 }

@@ -2,7 +2,6 @@ package com.anderk.ecommerce.catalog.adapter.out.persistence;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Locale;
 
 import com.anderk.ecommerce.catalog.adapter.out.persistence.catalog.CatalogItemJpaEntity;
 import com.anderk.ecommerce.catalog.adapter.out.persistence.category.CategoryJpaEntity;
@@ -26,12 +25,7 @@ public final class CatalogItemMapper {
 
     /** The text the public search matches against: lower case, without accents. */
     public static String searchText(String name, String description) {
-        String raw = (name == null ? "" : name) + " " + (description == null ? "" : description);
-        return java.text.Normalizer.normalize(raw, java.text.Normalizer.Form.NFD)
-                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
-                .toLowerCase(Locale.ROOT)
-                .replaceAll("[^a-z0-9]+", " ")
-                .trim();
+        return SearchText.of(name, description);
     }
 
     /** The domain item the entity represents. */

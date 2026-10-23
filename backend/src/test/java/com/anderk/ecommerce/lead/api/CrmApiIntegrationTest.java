@@ -200,6 +200,22 @@ class CrmApiIntegrationTest {
         assertThat(((Number) byText.get("totalElements")).longValue()).isGreaterThanOrEqualTo(1);
     }
 
+    @Test
+    @DisplayName("the listing sorts by the requested field")
+    void theListingSortsByTheRequestedField() {
+        String token = "srt" + System.nanoTime();
+        this.createLead("Zeta " + token);
+        this.createLead("Alfa " + token);
+
+        Map<String, Object> byName = this.get("/api/admin/leads?q=" + token + "&sort=name_asc&size=50");
+        List<Map<String, Object>> content = (List<Map<String, Object>>) byName.get("content");
+        List<String> names = content.stream()
+                .map(lead -> (String) lead.get("name"))
+                .toList();
+
+        assertThat(names).containsExactly("Alfa " + token, "Zeta " + token);
+    }
+
     // --- the helpers --------------------------------------------------------
 
     private long idOf(Map<String, Object> body) {

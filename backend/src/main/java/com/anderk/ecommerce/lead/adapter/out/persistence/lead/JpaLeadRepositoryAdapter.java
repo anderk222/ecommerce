@@ -1,18 +1,25 @@
 package com.anderk.ecommerce.lead.adapter.out.persistence.lead;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.anderk.ecommerce.domain.pagination.DomainPage;
+import com.anderk.ecommerce.domain.pagination.PageRequestDto;
 import com.anderk.ecommerce.lead.domain.model.Lead;
 import com.anderk.ecommerce.lead.domain.port.LeadRepository;
+import com.anderk.ecommerce.lead.domain.search.LeadSearchCriteria;
 
-import org.springframework.stereotype.Component;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The output adapter of the leads.
+ * The output adapter of the leads: JPA on one side, the outbound port on the
+ * other.
  */
-@Component
 @Transactional
 public class JpaLeadRepositoryAdapter implements LeadRepository {
 
@@ -54,6 +61,26 @@ public class JpaLeadRepositoryAdapter implements LeadRepository {
     @Transactional(readOnly = true)
     public Optional<Lead> findByEmail(String email) {
         return this.leads.findByEmail(email).map(JpaLeadRepositoryAdapter::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DomainPage<Lead> search(LeadSearchCriteria criteria, PageRequestDto page) {
+        Pageable pageable = PageRequest.of(page.page(), page.size(), LeadSorting.of(criteria.sort()));
+        Page<LeadJpaEntity> found = this.leads.findAll(LeadSpecifications.from(criteria), pageable);
+        List<Lead> content = found.getContent().stream()
+                .map(JpaLeadRepositoryAdapter::toDomain)
+                .toList();
+        return DomainPage.of(content, found.getNumber(), found.getSize(), found.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Lead> findAll(LeadSearchCriteria criteria) {
+        Sort sort = LeadSorting.of(criteria.sort());
+        return this.leads.findAll(LeadSpecifications.from(criteria), sort).stream()
+                .map(JpaLeadRepositoryAdapter::toDomain)
+                .toList();
     }
 
     @Override

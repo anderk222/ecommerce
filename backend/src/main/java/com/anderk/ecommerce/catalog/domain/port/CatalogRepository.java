@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.anderk.ecommerce.catalog.domain.model.CatalogItem;
 import com.anderk.ecommerce.catalog.domain.model.ItemType;
+import com.anderk.ecommerce.catalog.domain.search.CatalogSearchCriteria;
 import com.anderk.ecommerce.domain.pagination.DomainPage;
 import com.anderk.ecommerce.domain.pagination.PageRequestDto;
 

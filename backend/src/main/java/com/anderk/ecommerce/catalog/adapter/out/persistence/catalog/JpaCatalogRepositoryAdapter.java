@@ -14,16 +14,13 @@ import com.anderk.ecommerce.catalog.domain.model.CatalogItem;
 import com.anderk.ecommerce.catalog.domain.model.Category;
 import com.anderk.ecommerce.catalog.domain.model.ItemType;
 import com.anderk.ecommerce.catalog.domain.port.CatalogRepository;
-import com.anderk.ecommerce.catalog.domain.port.CatalogSearchCriteria;
-import com.anderk.ecommerce.catalog.domain.port.CatalogSort;
-import com.anderk.ecommerce.catalog.domain.port.ItemStateFilter;
+import com.anderk.ecommerce.catalog.domain.search.CatalogSearchCriteria;
 import com.anderk.ecommerce.domain.pagination.DomainPage;
 import com.anderk.ecommerce.domain.pagination.PageRequestDto;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -36,11 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 public class JpaCatalogRepositoryAdapter implements CatalogRepository {
-
-    private static final int STATE_ALL = 0;
-    private static final int STATE_ACTIVE = 1;
-    private static final int STATE_INACTIVE = 2;
-    private static final int STATE_DELETED = 3;
 
     private final CatalogItemJpaRepository items;
 
@@ -98,20 +90,9 @@ public class JpaCatalogRepositoryAdapter implements CatalogRepository {
     @Override
     @Transactional(readOnly = true)
     public DomainPage<CatalogItem> search(CatalogSearchCriteria criteria, PageRequestDto page) {
-        String search = criteria.hasQuery()
-                ? "%" + CatalogItemMapper.searchText(criteria.query(), "") + "%"
-                : null;
-        Pageable pageable = PageRequest.of(page.page(), page.size(), sortOf(criteria.sort()));
-        Page<CatalogItemJpaEntity> found = this.items.search(
-                criteria.type(),
-                stateOf(criteria.state()),
-                search,
-                criteria.categorySlug(),
-                criteria.onSale(),
-                criteria.lowStockOnly(),
-                criteria.lowStockThreshold(),
-                Instant.now(),
-                pageable);
+        Pageable pageable = PageRequest.of(page.page(), page.size(), CatalogItemSorting.of(criteria.sort()));
+        Page<CatalogItemJpaEntity> found = this.items.findAll(
+                CatalogItemSpecifications.from(criteria, Instant.now()), pageable);
         Map<Long, List<Category>> byItem = this.categoriesOf(found.getContent());
         List<CatalogItem> content = found.getContent().stream()
                 .map(entity -> CatalogItemMapper.toDomain(entity, byItem.getOrDefault(entity.getId(), List.of())))
@@ -208,30 +189,5 @@ public class JpaCatalogRepositoryAdapter implements CatalogRepository {
                     .add(CatalogItemMapper.toDomain(row.getCategory()));
         }
         return byItem;
-    }
-
-    private int stateOf(ItemStateFilter state) {
-        if (state == null) {
-            return STATE_ALL;
-        }
-        return switch (state) {
-            case ACTIVE -> STATE_ACTIVE;
-            case INACTIVE -> STATE_INACTIVE;
-            case DELETED -> STATE_DELETED;
-            case ALL -> STATE_ALL;
-        };
-    }
-
-    private Sort sortOf(CatalogSort sort) {
-        CatalogSort effective = sort == null ? CatalogSort.NEWEST : sort;
-        return switch (effective) {
-            case NEWEST -> Sort.by(Sort.Order.desc("createdAt"));
-            case OLDEST -> Sort.by(Sort.Order.asc("createdAt"));
-            case PRICE_ASC -> Sort.by(Sort.Order.asc("price"), Sort.Order.asc("name"));
-            case PRICE_DESC -> Sort.by(Sort.Order.desc("price"), Sort.Order.asc("name"));
-            case NAME_ASC -> Sort.by(Sort.Order.asc("name"));
-            case NAME_DESC -> Sort.by(Sort.Order.desc("name"));
-            case BEST_SELLING -> Sort.by(Sort.Order.desc("salesCount"), Sort.Order.desc("createdAt"));
-        };
     }
 }

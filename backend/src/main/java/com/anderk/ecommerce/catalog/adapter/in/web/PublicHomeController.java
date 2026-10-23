@@ -1,7 +1,7 @@
 package com.anderk.ecommerce.catalog.adapter.in.web;
 
 import com.anderk.ecommerce.catalog.adapter.in.web.dto.HomeResponse;
-import com.anderk.ecommerce.catalog.application.CatalogQueryService;
+import com.anderk.ecommerce.catalog.application.usecases.GetHomeContentUseCase;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/public/home")
 public class PublicHomeController {
 
-    private final CatalogQueryService catalogQueryService;
+    private final GetHomeContentUseCase getHomeContentUseCase;
 
-    public PublicHomeController(CatalogQueryService catalogQueryService) {
-        this.catalogQueryService = catalogQueryService;
+    public PublicHomeController(GetHomeContentUseCase getHomeContentUseCase) {
+        this.getHomeContentUseCase = getHomeContentUseCase;
     }
 
     @GetMapping
     public HomeResponse home() {
-        return CatalogApiMapper.toResponse(this.catalogQueryService.getHome());
+        return CatalogApiMapper.toResponse(this.getHomeContentUseCase.getHome());
     }
 }

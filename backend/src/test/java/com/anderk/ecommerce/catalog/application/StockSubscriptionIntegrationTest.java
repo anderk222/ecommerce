@@ -5,7 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 
 import com.anderk.ecommerce.TestcontainersConfiguration;
+import com.anderk.ecommerce.catalog.application.command.SubscribeToStockCommand;
 import com.anderk.ecommerce.catalog.application.command.UpdateCatalogItemCommand;
+import com.anderk.ecommerce.catalog.application.usecases.SubscribeToStockUseCase;
+import com.anderk.ecommerce.catalog.application.usecases.UpdateCatalogItemUseCase;
 import com.anderk.ecommerce.catalog.domain.model.CatalogItem;
 import com.anderk.ecommerce.catalog.domain.model.ItemType;
 import com.anderk.ecommerce.catalog.domain.model.StockSubscription;
@@ -30,7 +33,10 @@ import org.springframework.transaction.annotation.Transactional;
 class StockSubscriptionIntegrationTest {
 
     @Autowired
-    private StockSubscriptionService stockSubscriptionService;
+    private SubscribeToStockUseCase subscribeToStockUseCase;
+
+    @Autowired
+    private UpdateCatalogItemUseCase updateCatalogItemUseCase;
 
     @Autowired
     private StockSubscriptionRepository subscriptionRepository;
@@ -38,15 +44,12 @@ class StockSubscriptionIntegrationTest {
     @Autowired
     private CatalogRepository catalogRepository;
 
-    @Autowired
-    private CatalogCommandService catalogCommandService;
-
     @Test
     @DisplayName("a subscription is created, and it is pending")
     void aSubscriptionIsCreatedAndItIsPending() {
         CatalogItem item = this.createItem("Ítem agotado", 0);
 
-        this.stockSubscriptionService.subscribe(new StockSubscriptionService.SubscribeCommand(
+        this.subscribeToStockUseCase.subscribe(new SubscribeToStockCommand(
                 "ana@mail.com", "Ana", "Pichincha", true, null, item.id(), List.of()));
 
         List<StockSubscription> pending = this.subscriptionRepository.findPendingByItem(item.id());
@@ -59,14 +62,14 @@ class StockSubscriptionIntegrationTest {
     void aReplenishedItemMarksItsPendingSubscriptionsAsNotified() {
         CatalogItem item = this.createItem("Ítem que vuelve", 0);
 
-        this.stockSubscriptionService.subscribe(new StockSubscriptionService.SubscribeCommand(
+        this.subscribeToStockUseCase.subscribe(new SubscribeToStockCommand(
                 "ana2@mail.com", "Ana", "Pichincha", true, null, item.id(), List.of()));
 
         assertThat(this.subscriptionRepository.findPendingByItem(item.id())).hasSize(1);
 
         // The administrator puts the stock back: the event is published and the
         // listener notifies the pending subscriptions.
-        this.catalogCommandService.update(item.id(), new UpdateCatalogItemCommand(
+        this.updateCatalogItemUseCase.update(item.id(), new UpdateCatalogItemCommand(
                 ItemType.PRODUCT,
                 "Ítem que vuelve",
                 "Un ítem que vuelve.",
