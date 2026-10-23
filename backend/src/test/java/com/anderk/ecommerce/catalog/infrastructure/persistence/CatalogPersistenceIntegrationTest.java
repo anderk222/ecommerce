@@ -129,4 +129,46 @@ class CatalogPersistenceIntegrationTest {
         assertThat(reloaded.tracksStock()).isFalse();
     }
 
+    @Test
+    @Transactional
+    @DisplayName("the best selling listing orders by sold units, breaks ties by newest and skips items with no sales")
+    void theBestSellingListingOrdersBySoldUnits() {
+        CatalogItem low = this.createItem("Poco vendido");
+        CatalogItem high = this.createItem("Muy vendido");
+        CatalogItem none = this.createItem("Sin ventas");
+
+        java.time.Instant tie = Instant.parse("2026-01-01T00:00:00Z");
+        CatalogItem tiedFirst = this.createItem("Empate primero", tie);
+        CatalogItem tiedSecond = this.createItem("Empate segundo", tie);
+
+        this.catalogRepository.registerSale(low.id(), 2);
+        this.catalogRepository.registerSale(high.id(), 40);
+        this.catalogRepository.registerSale(tiedFirst.id(), 3);
+        this.catalogRepository.registerSale(tiedSecond.id(), 3);
+
+        this.entityManager.flush();
+        this.entityManager.clear();
+
+        List<CatalogItem> best = this.catalogRepository.listBestSelling(20);
+
+        assertThat(best).extracting(CatalogItem::id)
+                .startsWith(high.id())
+                .doesNotContain(none.id());
+
+        List<Long> ids = best.stream().map(CatalogItem::id).toList();
+        assertThat(ids.indexOf(tiedSecond.id())).isLessThan(ids.indexOf(tiedFirst.id()));
+    }
+
+    private CatalogItem createItem(String name) {
+        return this.createItem(name, Instant.now());
+    }
+
+    private CatalogItem createItem(String name, Instant createdAt) {
+        return this.catalogRepository.save(new CatalogItem(
+                null, ItemType.PRODUCT, name, Slug.of(name), "Un ítem de prueba.",
+                Money.of(new java.math.BigDecimal("10.00")), 10,
+                List.of(), List.of(), List.of(),
+                false, true, null, createdAt));
+    }
+
 }

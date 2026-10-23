@@ -241,7 +241,7 @@ distinguen por `type`. Es la tabla que más se lee del sistema.
 | `deleted_at` | `timestamptz` | sí | — | Borrado lógico. Si tiene valor, el ítem no se lista. |
 | `created_at` | `timestamptz` | no | `now()` | Alta. |
 | `updated_at` | `timestamptz` | no | `now()` | Última modificación (la mantiene Hibernate). |
-| `sales_count` | `integer` | no | `0` | Proyección de «más comprado»: unidades confirmadas. Hoy solo tiene los valores sembrados (ver notas). |
+| `sales_count` | `integer` | no | `0` | Unidades vendidas; alimenta el orden de «más comprado». |
 
 **Restricciones.**
 - `ck_catalog_items_type`: `type in ('PRODUCT','SERVICE')`.
@@ -253,8 +253,8 @@ distinguen por `type`. Es la tabla que más se lee del sistema.
 - Un ítem puede estar `is_active = false` (despublicado) sin estar borrado; y `deleted_at` no nulo
   implica borrado lógico. Las consultas públicas exigen ambas cosas.
 - `search_text` lo calcula la aplicación al escribir; no hay trigger ni extensión de PostgreSQL.
-- `sales_count` es una **proyección**, no la fuente de verdad: evita que el catálogo consulte las
-  tablas de pedidos. Ver [la nota sobre su actualización](#sales_count-no-se-actualiza-al-comprar).
+- `sales_count` se actualiza solo con cada compra y sirve para ordenar el catálogo por «más
+  comprado» sin consultar las tablas de pedidos.
 
 ---
 
@@ -577,8 +577,8 @@ Además de las PK y los `UNIQUE` implícitos, el esquema crea estos índices:
 10. **El pedido es un documento congelado.** `order_items` copia nombre y precio; el catálogo puede
     cambiar sin reescribir la historia.
 11. **Una suscripción por persona e ítem.** `UNIQUE (lead_id, item_id)`.
-12. **El «más comprado» es una proyección.** `sales_count` evita cruzar dominios en cada lectura del
-    catálogo; hoy solo tiene los valores sembrados (ver [notas](#sales_count-no-se-actualiza-al-comprar)).
+12. **El «más comprado» se calcula con cada venta.** El checkout suma las unidades vendidas a
+    `sales_count`, y el catálogo solo tiene que ordenar por esa cifra.
 
 ---
 
@@ -596,14 +596,6 @@ para reportes por origen hay que usar `string_to_array`/`unnest` o migrar a una 
 `catalog_item_categories` no declara `UNIQUE (item_id, category_id)`. La aplicación reemplaza el
 conjunto de categorías al guardar y comprueba duplicados, así que en la práctica no se repiten;
 pero la base no lo impide. Añadirlo sería una migración de una línea.
-
-### `sales_count` no se actualiza al comprar
-
-La columna existe, el catálogo ordena por ella en «más comprado» y `V2__seed_catalog.sql` la
-siembra con valores; pero **ningún caso de uso la incrementa** al confirmar un pedido. En una base
-con datos reales, el orden «más comprado» quedaría congelado en esos valores iniciales. La fuente
-de verdad siempre fue `order_items`; para que la proyección vuelva a moverse, el checkout tendría
-que incrementarla en la misma transacción en la que descuenta el stock.
 
 ### `province` cubre 20 de las 24 provincias de Ecuador
 

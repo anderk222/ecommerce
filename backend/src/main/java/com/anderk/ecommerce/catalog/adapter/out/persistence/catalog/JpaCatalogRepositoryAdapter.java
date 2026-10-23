@@ -15,6 +15,9 @@ import com.anderk.ecommerce.catalog.domain.model.Category;
 import com.anderk.ecommerce.catalog.domain.model.ItemType;
 import com.anderk.ecommerce.catalog.domain.port.CatalogRepository;
 import com.anderk.ecommerce.catalog.domain.search.CatalogSearchCriteria;
+import com.anderk.ecommerce.domain.error.ErrorDetail;
+import com.anderk.ecommerce.domain.error.NotFoundException;
+import com.anderk.ecommerce.domain.error.ValidationException;
 import com.anderk.ecommerce.domain.pagination.DomainPage;
 import com.anderk.ecommerce.domain.pagination.PageRequestDto;
 
@@ -128,6 +131,19 @@ public class JpaCatalogRepositoryAdapter implements CatalogRepository {
         return this.items.listBestSelling(PageRequest.of(0, limit)).stream()
                 .map(entity -> CatalogItemMapper.toDomain(entity, this.categoriesOf(entity)))
                 .toList();
+    }
+
+    @Override
+    public void registerSale(Long itemId, int units) {
+        if (units <= 0) {
+            throw new ValidationException("Las unidades vendidas deben ser mayores a cero",
+                    ErrorDetail.of("units", "debe ser mayor a cero"));
+        }
+        CatalogItemJpaEntity entity = this.items.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("No existe el ítem " + itemId));
+        // The caller has already locked the row. The change travels through the
+        // entity, so it is flushed in the same transaction as the sale.
+        entity.setSalesCount(entity.getSalesCount() + units);
     }
 
     @Override

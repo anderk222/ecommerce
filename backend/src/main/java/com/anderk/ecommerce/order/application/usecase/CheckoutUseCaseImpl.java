@@ -25,6 +25,7 @@ import com.anderk.ecommerce.tracking.domain.model.EventType;
 
 import java.util.Map;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -60,6 +61,7 @@ public class CheckoutUseCaseImpl implements CheckoutUseCase {
     }
 
     @Override
+    @CacheEvict(cacheNames = {"catalog-home", "catalog-listings"}, allEntries = true)
     public OrderConfirmation checkout(CheckoutCommand command) {
 
         Instant now = Instant.now();
@@ -80,6 +82,10 @@ public class CheckoutUseCaseImpl implements CheckoutUseCase {
             // The stock is discounted through the entity, so the change is
             // written in the same transaction as the order (tech-stack 2.3).
             this.catalogRepository.save(item.discountStock(requested.quantity()));
+
+            // The "most bought" projection moves with the sale, in the same
+            // transaction and on the row that is already locked.
+            this.catalogRepository.registerSale(item.id(), requested.quantity());
 
             BigDecimal unitPrice = breakdown.finalPrice();
             BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(requested.quantity()));

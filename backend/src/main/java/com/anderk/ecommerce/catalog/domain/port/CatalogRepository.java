@@ -55,6 +55,20 @@ public interface CatalogRepository {
     List<CatalogItem> listBestSelling(int limit);
 
     /**
+     * Adds units to the "most bought" projection of an item.
+     *
+     * <p>The order is the source of truth; this counter is only the projection
+     * the catalog reads, so it is updated in the same transaction that
+     * discounts the stock. The caller must have locked the item beforehand
+     * ({@link #findByIdForUpdate(Long)}), so two concurrent purchases cannot
+     * lose one of the two increments.
+     *
+     * @param itemId the item that was sold
+     * @param units  the units the confirmed purchase took
+     */
+    void registerSale(Long itemId, int units);
+
+    /**
      * The most recent published items of a kind.
      *
      * <p>It is what the home page shows in its two sections: the services

@@ -21,6 +21,8 @@ import com.anderk.ecommerce.domain.model.vo.Email;
 import com.anderk.ecommerce.lead.domain.port.LeadRepository;
 import com.anderk.ecommerce.order.application.usecase.CheckoutUseCase;
 
+import jakarta.persistence.EntityManager;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,9 @@ class CheckoutIntegrationTest {
     @Autowired
     private LeadRepository leadRepository;
 
+    @Autowired
+    private EntityManager entityManager;
+
     @Test
     @DisplayName("the order is created with the prices of the moment, the stock goes down and the lead exists")
     void theOrderIsCreatedWithThePricesOfTheMoment() {
@@ -60,6 +65,9 @@ class CheckoutIntegrationTest {
 
         CatalogItem reloaded = this.catalogRepository.findById(item.id()).orElseThrow();
         assertThat(reloaded.stock()).isEqualTo(3);
+
+        // The "most bought" projection moves with the sale (HU-01).
+        assertThat(this.salesCountOf(item.id())).isEqualTo(2);
 
         var lead = this.leadRepository.findById(confirmation.leadId()).orElseThrow();
         assertThat(lead.sources()).contains(
@@ -115,6 +123,13 @@ class CheckoutIntegrationTest {
                 new CheckoutUseCase.Customer("Comprador", new Email("otro@mail.com"), null, "Pichincha", true),
                 List.of(new CheckoutUseCase.RequestedItem(item.id(), 5)))))
                 .isInstanceOf(InsufficientStockException.class);
+    }
+
+    private int salesCountOf(Long itemId) {
+        return ((Number) this.entityManager.createNativeQuery(
+                "select sales_count from catalog_items where id = :id")
+                .setParameter("id", itemId)
+                .getSingleResult()).intValue();
     }
 
     private CatalogItem createItem(String name, int stock, String price) {

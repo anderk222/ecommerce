@@ -48,7 +48,7 @@ public interface CatalogItemJpaRepository
 
     /** The published items with the most confirmed purchases. */
     @Query("select i from CatalogItemJpaEntity i where i.active = true and i.deletedAt is null "
-            + "order by i.salesCount desc, i.createdAt desc")
+            + "and i.salesCount > 0 order by i.salesCount desc, i.createdAt desc, i.id desc")
     List<CatalogItemJpaEntity> listBestSelling(Pageable pageable);
 
     /** The most recent published items of a kind. */
