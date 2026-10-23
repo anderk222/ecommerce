@@ -2,11 +2,11 @@ package com.anderk.ecommerce.lead.adapter.out.persistence.lead;
 
 import java.util.List;
 
+import com.anderk.ecommerce.domain.pagination.DomainPage;
+import com.anderk.ecommerce.domain.pagination.PageRequestDto;
 import com.anderk.ecommerce.lead.domain.model.Lead;
 import com.anderk.ecommerce.lead.domain.port.LeadSearchCriteria;
 import com.anderk.ecommerce.lead.domain.port.LeadSearchRepository;
-import com.anderk.ecommerce.shared.pagination.DomainPage;
-import com.anderk.ecommerce.shared.pagination.PageRequestDto;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.anderk.ecommerce.auth.adapter.in.web.dto.LoginRequest;
 import com.anderk.ecommerce.auth.application.usecases.LoginUseCase;
+import com.anderk.ecommerce.auth.application.usecases.LoginUseCase.LoginResult;
 
 /**
  * The login of the staff (HU-13).
@@ -27,8 +29,8 @@ public class AuthController {
 
     /** Checks the credentials and answers with a token. */
     @PostMapping("/login")
-    public ResponseEntity<LoginUseCase.LoginResponse> login(
-            @Valid @RequestBody LoginUseCase.LoginRequest request) {
-        return ResponseEntity.ok(this.authService.login(request));
+    public ResponseEntity<LoginResult> login(
+            @Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(this.authService.login(request.toLoginUseCaseCommand()));
     }
 }

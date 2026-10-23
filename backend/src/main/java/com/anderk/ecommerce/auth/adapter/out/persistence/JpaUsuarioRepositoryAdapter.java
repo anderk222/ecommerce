@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.anderk.ecommerce.auth.domain.model.Usuario;
 import com.anderk.ecommerce.auth.domain.port.UsuarioRepository;
+import com.anderk.ecommerce.domain.model.vo.Email;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +38,7 @@ public class JpaUsuarioRepositoryAdapter implements UsuarioRepository {
                 ? new UsuarioJpaEntity()
                 : this.usuarios.findById(usuario.id()).orElseGet(UsuarioJpaEntity::new);
         entity.setId(usuario.id());
-        entity.setEmail(usuario.email());
+        entity.setEmail(usuario.email().toString());
         entity.setPasswordHash(usuario.password());
         entity.setDisplayName(usuario.nombre());
         entity.setRole(usuario.role());
@@ -45,7 +46,7 @@ public class JpaUsuarioRepositoryAdapter implements UsuarioRepository {
     }
 
     private static Usuario toDomain(UsuarioJpaEntity entity) {
-        return new Usuario(entity.getId(), entity.getDisplayName(), entity.getEmail(),
+        return new Usuario(entity.getId(), entity.getDisplayName(), new Email(entity.getEmail()),
                 entity.getPasswordHash(), entity.getRole());
     }
 }

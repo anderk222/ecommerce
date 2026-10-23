@@ -7,21 +7,20 @@ import java.util.Map;
 
 import com.anderk.ecommerce.catalog.domain.port.CatalogRepository;
 import com.anderk.ecommerce.domain.error.NotFoundException;
-import com.anderk.ecommerce.lead.application.view.KanbanBoard;
-import com.anderk.ecommerce.lead.application.view.LeadDetailView;
-import com.anderk.ecommerce.lead.application.view.LeadView;
+import com.anderk.ecommerce.domain.pagination.DomainPage;
+import com.anderk.ecommerce.domain.pagination.PageRequestDto;
+import com.anderk.ecommerce.domain.pagination.PageResponse;
+import com.anderk.ecommerce.lead.application.usecases.result.KanbanBoardResult;
+import com.anderk.ecommerce.lead.application.usecases.result.LeadDetailResult;
+import com.anderk.ecommerce.lead.application.usecases.result.LeadResult;
 import com.anderk.ecommerce.lead.domain.model.Lead;
-import com.anderk.ecommerce.lead.domain.model.LeadStatus;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadStatus;
 import com.anderk.ecommerce.lead.domain.port.LeadNoteRepository;
-import com.anderk.ecommerce.shared.annotation.UseCase;
 import com.anderk.ecommerce.lead.domain.port.LeadRepository;
 import com.anderk.ecommerce.lead.domain.port.LeadSearchCriteria;
 import com.anderk.ecommerce.lead.domain.port.LeadSearchRepository;
 import com.anderk.ecommerce.lead.domain.port.LeadStatusHistoryRepository;
 import com.anderk.ecommerce.order.domain.port.OrderRepository;
-import com.anderk.ecommerce.shared.pagination.DomainPage;
-import com.anderk.ecommerce.shared.pagination.PageRequestDto;
-import com.anderk.ecommerce.shared.pagination.PageResponse;
 import com.anderk.ecommerce.tracking.domain.port.ActivityEventRepository;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * The use cases that read the leads.
  */
-@UseCase
 @Transactional(readOnly = true)
 public class LeadQueryServiceImpl implements LeadQueryService {
 
@@ -64,22 +62,22 @@ public class LeadQueryServiceImpl implements LeadQueryService {
     }
 
     @Override
-    public PageResponse<LeadView> search(LeadSearchCriteria criteria, PageRequestDto page) {
+    public PageResponse<LeadResult> search(LeadSearchCriteria criteria, PageRequestDto page) {
         DomainPage<Lead> found = this.leadSearchRepository.search(criteria, page);
-        List<LeadView> content = found.content().stream().map(this::toView).toList();
+        List<LeadResult> content = found.content().stream().map(this::toView).toList();
         return PageResponse.of(content, found.page(), found.size(), found.totalElements());
     }
 
     @Override
-    public LeadDetailView getDetail(Long id) {
+    public LeadDetailResult getDetail(Long id) {
         Lead lead = this.leadRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("No existe el lead " + id));
 
         // The read of the timeline names the products (P35): one lookup per
         // distinct catalog item of the timeline, never two.
         Map<Long, String> itemNames = new java.util.HashMap<>();
-        List<LeadDetailView.TimelineEntry> timeline = this.eventRepository.findByLead(id, 200).stream()
-                .map(event -> new LeadDetailView.TimelineEntry(
+        List<LeadDetailResult.TimelineEntry> timeline = this.eventRepository.findByLead(id, 200).stream()
+                .map(event -> new LeadDetailResult.TimelineEntry(
                         event.eventType().name(),
                         event.entityType(),
                         event.entityId(),
@@ -88,7 +86,7 @@ public class LeadQueryServiceImpl implements LeadQueryService {
                         event.createdAt()))
                 .toList();
 
-        return new LeadDetailView(
+        return new LeadDetailResult(
                 toView(lead),
                 timeline,
                 this.orderRepository.findByLead(id, 50),
@@ -123,26 +121,26 @@ public class LeadQueryServiceImpl implements LeadQueryService {
     }
 
     @Override
-    public KanbanBoard getKanban(LeadSearchCriteria criteria) {
+    public KanbanBoardResult getKanban(LeadSearchCriteria criteria) {
         List<Lead> leads = this.leadSearchRepository.findAll(criteria);
 
-        Map<LeadStatus, List<LeadView>> byStatus = new EnumMap<>(LeadStatus.class);
+        Map<LeadStatus, List<LeadResult>> byStatus = new EnumMap<>(LeadStatus.class);
         for (LeadStatus status : LeadStatus.values()) {
             byStatus.put(status, new ArrayList<>());
         }
         leads.forEach(lead -> byStatus.get(lead.status()).add(toView(lead)));
 
-        List<KanbanBoard.KanbanColumn> columns = new ArrayList<>();
+        List<KanbanBoardResult.KanbanColumn> columns = new ArrayList<>();
         for (LeadStatus status : LeadStatus.values()) {
-            List<LeadView> column = byStatus.get(status);
+            List<LeadResult> column = byStatus.get(status);
             java.math.BigDecimal total = column.stream()
-                    .map(LeadView::saleAmount)
+                    .map(LeadResult::saleAmount)
                     .filter(java.util.Objects::nonNull)
                     .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
-            columns.add(new KanbanBoard.KanbanColumn(status.name(), label(status), column, column.size(), total));
+            columns.add(new KanbanBoardResult.KanbanColumn(status.name(), label(status), column, column.size(), total));
         }
 
-        return new KanbanBoard(columns);
+        return new KanbanBoardResult(columns);
     }
 
     private String label(LeadStatus status) {
@@ -153,8 +151,8 @@ public class LeadQueryServiceImpl implements LeadQueryService {
         };
     }
 
-    private LeadView toView(Lead lead) {
-        return new LeadView(
+    private LeadResult toView(Lead lead) {
+        return new LeadResult(
                 lead.id(),
                 lead.name(),
                 lead.email(),

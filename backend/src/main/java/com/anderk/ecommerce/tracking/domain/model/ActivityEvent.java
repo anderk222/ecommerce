@@ -8,17 +8,19 @@ import com.anderk.ecommerce.domain.error.ValidationException;
 /**
  * One action of the visitor (HU-09).
  *
- * <p>Every event carries the anonymous identifier of the visitor and, once the
+ * <p>
+ * Every event carries the anonymous identifier of the visitor and, once the
  * visitor has given a contact, the lead it belongs to.
  *
- * @param id the identifier, null before it is persisted
+ * @param id          the identifier, null before it is persisted
  * @param anonymousId the identifier of the browser
- * @param leadId the lead the event belongs to, null while the visitor is anonymous
- * @param eventType what the visitor did
- * @param entityType the kind of entity the event is about
- * @param entityId the identifier of that entity
- * @param metadata the details of the event
- * @param createdAt when it happened
+ * @param leadId      the lead the event belongs to, null while the visitor is
+ *                    anonymous
+ * @param eventType   what the visitor did
+ * @param entityType  the kind of entity the event is about
+ * @param entityId    the identifier of that entity
+ * @param metadata    the details of the event
+ * @param createdAt   when it happened
  */
 public record ActivityEvent(
         Long id,

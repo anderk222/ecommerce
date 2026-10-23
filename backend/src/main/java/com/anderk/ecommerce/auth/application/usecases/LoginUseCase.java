@@ -1,5 +1,8 @@
 package com.anderk.ecommerce.auth.application.usecases;
 
+import com.anderk.ecommerce.auth.domain.model.vo.RawPassword;
+import com.anderk.ecommerce.domain.model.vo.Email;
+
 /**
  * The port of the login (HU-13).
  */
@@ -11,7 +14,7 @@ public interface LoginUseCase {
      * @throws com.anderk.ecommerce.domain.error.UnauthenticatedException if the email or the password
      *         are wrong
      */
-    LoginResponse login(LoginRequest request);
+    LoginResult login(LoginCommand request);
 
     /**
      * The body of the login.
@@ -19,7 +22,7 @@ public interface LoginUseCase {
      * @param email the login name
      * @param password the password, in clear
      */
-    record LoginRequest(String email, String password) {
+    public record LoginCommand(Email email, RawPassword password) {
     }
 
     /**
@@ -31,6 +34,6 @@ public interface LoginUseCase {
      * @param role {@code ADMIN}
      * @param expiresIn the lifetime of the token, in seconds
      */
-    record LoginResponse(String token, String email, String nombre, String role, long expiresIn) {
+    public record LoginResult(String token, String email, String nombre, String role, long expiresIn) {
     }
 }

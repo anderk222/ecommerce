@@ -23,10 +23,9 @@ import com.anderk.ecommerce.catalog.domain.port.CatalogSearchCriteria;
 import com.anderk.ecommerce.catalog.domain.port.CategoryRepository;
 import com.anderk.ecommerce.catalog.domain.port.DiscountRepository;
 import com.anderk.ecommerce.domain.error.NotFoundException;
-import com.anderk.ecommerce.shared.annotation.UseCase;
-import com.anderk.ecommerce.shared.pagination.DomainPage;
-import com.anderk.ecommerce.shared.pagination.PageRequestDto;
-import com.anderk.ecommerce.shared.pagination.PageResponse;
+import com.anderk.ecommerce.domain.pagination.DomainPage;
+import com.anderk.ecommerce.domain.pagination.PageRequestDto;
+import com.anderk.ecommerce.domain.pagination.PageResponse;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>It depends only on the outbound ports of the domain and on the pricing
  * policy. It never sees a controller, an HTTP status or a database session.
  */
-@UseCase
 @Transactional(readOnly = true)
 public class CatalogQueryServiceImpl implements CatalogQueryService {
 

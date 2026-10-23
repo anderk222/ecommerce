@@ -7,12 +7,23 @@ import com.anderk.ecommerce.catalog.adapter.out.persistence.category.CategoryJpa
 import com.anderk.ecommerce.catalog.adapter.out.persistence.category.JpaCategoryRepositoryAdapter;
 import com.anderk.ecommerce.catalog.adapter.out.persistence.discount.DiscountJpaRepository;
 import com.anderk.ecommerce.catalog.adapter.out.persistence.discount.JpaDiscountRepositoryAdapter;
+import com.anderk.ecommerce.catalog.application.CatalogCommandService;
+import com.anderk.ecommerce.catalog.application.CatalogCommandServiceImpl;
+import com.anderk.ecommerce.catalog.application.CatalogQueryService;
+import com.anderk.ecommerce.catalog.application.CatalogQueryServiceImpl;
+import com.anderk.ecommerce.catalog.application.CategoryCommandService;
+import com.anderk.ecommerce.catalog.application.CategoryCommandServiceImpl;
+import com.anderk.ecommerce.catalog.application.StockSubscriptionService;
+import com.anderk.ecommerce.catalog.application.StockSubscriptionServiceImpl;
 import com.anderk.ecommerce.catalog.domain.policy.PercentagePricingPolicy;
 import com.anderk.ecommerce.catalog.domain.policy.PricingPolicy;
 import com.anderk.ecommerce.catalog.domain.policy.StockPolicy;
 import com.anderk.ecommerce.catalog.domain.port.CatalogRepository;
 import com.anderk.ecommerce.catalog.domain.port.CategoryRepository;
 import com.anderk.ecommerce.catalog.domain.port.DiscountRepository;
+import com.anderk.ecommerce.catalog.domain.port.DomainEventPublisher;
+import com.anderk.ecommerce.catalog.domain.port.StockSubscriptionRepository;
+import com.anderk.ecommerce.lead.application.usecases.CaptureLeadUseCase;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,10 +34,6 @@ import org.springframework.context.annotation.Configuration;
  * <p>Tech-stack §2.2.6 asks for one {@code @Configuration} per feature, so
  * that the graph is readable: the adapters are beans, and the use cases
  * depend on the ports, not on the adapters.
- *
- * <p>The use cases are not declared here: they carry the {@code @UseCase}
- * stereotype, which is a {@code @Service}, and Spring finds them by
- * component scanning.
  */
 @Configuration
 public class CatalogConfig {
@@ -59,5 +66,39 @@ public class CatalogConfig {
     @Bean
     StockPolicy stockPolicy() {
         return new StockPolicy();
+    }
+
+    @Bean
+    CatalogCommandService catalogCommandService(
+            CatalogRepository catalogRepository,
+            CategoryRepository categoryRepository,
+            DiscountRepository discountRepository,
+            PricingPolicy pricingPolicy,
+            DomainEventPublisher eventPublisher) {
+        return new CatalogCommandServiceImpl(catalogRepository, categoryRepository, discountRepository,
+                pricingPolicy, eventPublisher);
+    }
+
+    @Bean
+    CatalogQueryService catalogQueryService(
+            CatalogRepository catalogRepository,
+            CategoryRepository categoryRepository,
+            DiscountRepository discountRepository,
+            PricingPolicy pricingPolicy,
+            StockPolicy stockPolicy) {
+        return new CatalogQueryServiceImpl(catalogRepository, categoryRepository, discountRepository,
+                pricingPolicy, stockPolicy);
+    }
+
+    @Bean
+    CategoryCommandService categoryCommandService(CategoryRepository categoryRepository) {
+        return new CategoryCommandServiceImpl(categoryRepository);
+    }
+
+    @Bean
+    StockSubscriptionService stockSubscriptionService(
+            StockSubscriptionRepository subscriptionRepository,
+            CaptureLeadUseCase leadCaptureService) {
+        return new StockSubscriptionServiceImpl(subscriptionRepository, leadCaptureService);
     }
 }

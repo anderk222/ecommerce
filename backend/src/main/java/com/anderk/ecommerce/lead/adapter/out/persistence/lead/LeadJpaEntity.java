@@ -7,9 +7,9 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.anderk.ecommerce.lead.domain.model.LeadOutcome;
-import com.anderk.ecommerce.lead.domain.model.LeadSource;
-import com.anderk.ecommerce.lead.domain.model.LeadStatus;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadOutcome;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadSource;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadStatus;
 import com.anderk.ecommerce.lead.domain.model.Province;
 
 import jakarta.persistence.Column;

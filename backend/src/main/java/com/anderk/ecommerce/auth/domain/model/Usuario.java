@@ -1,5 +1,7 @@
 package com.anderk.ecommerce.auth.domain.model;
 
+import com.anderk.ecommerce.domain.model.vo.Email;
+
 /**
  * A member of the staff: the administrator.
  *
@@ -12,7 +14,7 @@ package com.anderk.ecommerce.auth.domain.model;
  * @param password the BCrypt hash of the password — never the password itself
  * @param role the role: {@code ADMIN}
  */
-public record Usuario(Long id, String nombre, String email, String password, String role) {
+public record Usuario(Long id, String nombre, Email email, String password, String role) {
 
     public static final String ROLE_ADMIN = "ADMIN";
 

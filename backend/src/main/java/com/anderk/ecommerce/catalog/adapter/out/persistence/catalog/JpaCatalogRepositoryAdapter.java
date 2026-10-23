@@ -17,8 +17,8 @@ import com.anderk.ecommerce.catalog.domain.port.CatalogRepository;
 import com.anderk.ecommerce.catalog.domain.port.CatalogSearchCriteria;
 import com.anderk.ecommerce.catalog.domain.port.CatalogSort;
 import com.anderk.ecommerce.catalog.domain.port.ItemStateFilter;
-import com.anderk.ecommerce.shared.pagination.DomainPage;
-import com.anderk.ecommerce.shared.pagination.PageRequestDto;
+import com.anderk.ecommerce.domain.pagination.DomainPage;
+import com.anderk.ecommerce.domain.pagination.PageRequestDto;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

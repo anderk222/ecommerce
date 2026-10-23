@@ -17,6 +17,7 @@ import com.anderk.ecommerce.catalog.domain.port.CatalogRepository;
 import com.anderk.ecommerce.catalog.domain.vo.Money;
 import com.anderk.ecommerce.catalog.domain.vo.Slug;
 import com.anderk.ecommerce.domain.error.InsufficientStockException;
+import com.anderk.ecommerce.domain.model.vo.Email;
 import com.anderk.ecommerce.lead.domain.port.LeadRepository;
 import com.anderk.ecommerce.order.application.usecase.CheckoutUseCase;
 
@@ -50,7 +51,7 @@ class CheckoutIntegrationTest {
 
         var confirmation = this.checkoutService.checkout(new CheckoutUseCase.CheckoutCommand(
                 "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
-                new CheckoutUseCase.Customer("Ana Pérez", "ana@mail.com", "0999999999", "Pichincha", true),
+                new CheckoutUseCase.Customer("Ana Pérez", new Email("ana@mail.com"), "0999999999", "Pichincha", true),
                 List.of(new CheckoutUseCase.RequestedItem(item.id(), 2))));
 
         assertThat(confirmation.total()).isEqualByComparingTo("198.00");
@@ -62,7 +63,7 @@ class CheckoutIntegrationTest {
 
         var lead = this.leadRepository.findById(confirmation.leadId()).orElseThrow();
         assertThat(lead.sources()).contains(
-                com.anderk.ecommerce.lead.domain.model.LeadSource.CHECKOUT);
+                com.anderk.ecommerce.lead.domain.model.enums.LeadSource.CHECKOUT);
         assertThat(discount.slug().value()).isEqualTo("router-de-prueba");
     }
 
@@ -79,7 +80,7 @@ class CheckoutIntegrationTest {
             try {
                 return this.checkoutService.checkout(new CheckoutUseCase.CheckoutCommand(
                         "bbbbbbbb-bbbb-4ccc-8ddd-eeeeeeeeeeee",
-                        new CheckoutUseCase.Customer("Comprador", "comprador@mail.com", null,
+                        new CheckoutUseCase.Customer("Comprador", new Email("comprador@mail.com"), null,
                                 "Pichincha", true),
                         List.of(new CheckoutUseCase.RequestedItem(item.id(), 1))));
             } catch (RuntimeException exception) {
@@ -111,7 +112,7 @@ class CheckoutIntegrationTest {
 
         assertThatThrownBy(() -> this.checkoutService.checkout(new CheckoutUseCase.CheckoutCommand(
                 "cccccccc-bbbb-4ccc-8ddd-eeeeeeeeeeee",
-                new CheckoutUseCase.Customer("Comprador", "otro@mail.com", null, "Pichincha", true),
+                new CheckoutUseCase.Customer("Comprador", new Email("otro@mail.com"), null, "Pichincha", true),
                 List.of(new CheckoutUseCase.RequestedItem(item.id(), 5)))))
                 .isInstanceOf(InsufficientStockException.class);
     }

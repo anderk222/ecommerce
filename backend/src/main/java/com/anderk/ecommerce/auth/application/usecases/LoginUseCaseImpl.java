@@ -1,19 +1,18 @@
 package com.anderk.ecommerce.auth.application.usecases;
 
-import com.anderk.ecommerce.auth.application.service.TokenService;
-import com.anderk.ecommerce.auth.application.service.TokenServiceImpl;
+import com.anderk.ecommerce.auth.application.out.TokenService;
 import com.anderk.ecommerce.auth.domain.model.AuthenticatedUser;
 import com.anderk.ecommerce.auth.domain.model.Usuario;
 import com.anderk.ecommerce.auth.domain.port.UsuarioRepository;
 import com.anderk.ecommerce.domain.error.UnauthenticatedException;
-import com.anderk.ecommerce.shared.annotation.UseCase;
+
+import java.util.Locale;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * The login of the staff (HU-13).
  */
-@UseCase
 public class LoginUseCaseImpl implements LoginUseCase {
 
     private final UsuarioRepository usuarioRepository;
@@ -31,31 +30,24 @@ public class LoginUseCaseImpl implements LoginUseCase {
     }
 
     @Override
-    public LoginUseCase.LoginResponse login(LoginUseCase.LoginRequest request) {
-        if (request == null || request.email() == null || request.password() == null) {
-            throw new UnauthenticatedException("El correo y la contraseña son obligatorios");
-        }
+    public LoginResult login(LoginCommand request) {
 
         Usuario usuario = this.usuarioRepository
-                .findByEmail(request.email().trim().toLowerCase(java.util.Locale.ROOT))
+                .findByEmail(request.email().toString().trim().toLowerCase(Locale.ROOT))
                 .orElseThrow(() -> new UnauthenticatedException("Las credenciales no son correctas"));
 
-        if (!this.passwordEncoder.matches(request.password(), usuario.password())) {
+        if (!this.passwordEncoder.matches(request.password().value(), usuario.password())) {
             throw new UnauthenticatedException("Las credenciales no son correctas");
         }
 
         AuthenticatedUser authenticated = new AuthenticatedUser(
                 usuario.id(), usuario.email(), usuario.nombre(), usuario.role());
 
-        long ttl = this.tokenService instanceof TokenServiceImpl implementation
-                ? implementation.ttlSeconds()
-                : 3600;
-
-        return new LoginUseCase.LoginResponse(
+        return new LoginResult(
                 this.tokenService.issue(authenticated),
-                usuario.email(),
+                usuario.email().value(),
                 usuario.nombre(),
                 usuario.role(),
-                ttl);
+                this.tokenService.ttlSeconds());
     }
 }

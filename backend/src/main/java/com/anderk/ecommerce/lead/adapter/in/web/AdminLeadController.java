@@ -1,26 +1,28 @@
 package com.anderk.ecommerce.lead.adapter.in.web;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 
+import com.anderk.ecommerce.domain.pagination.PageRequestDto;
+import com.anderk.ecommerce.domain.pagination.PageResponse;
+import com.anderk.ecommerce.lead.adapter.in.web.dto.ChangeLeadStatusRequest;
+import com.anderk.ecommerce.lead.adapter.in.web.dto.CreateLeadRequest;
+import com.anderk.ecommerce.lead.adapter.in.web.dto.NoteRequest;
+import com.anderk.ecommerce.lead.adapter.in.web.dto.UpdateLeadRequest;
 import com.anderk.ecommerce.lead.application.LeadCommandService;
-import com.anderk.ecommerce.lead.application.LeadKpiService;
-import com.anderk.ecommerce.lead.application.LeadNoteView;
 import com.anderk.ecommerce.lead.application.LeadQueryService;
-import com.anderk.ecommerce.lead.application.view.KanbanBoard;
-import com.anderk.ecommerce.lead.application.view.LeadDetailView;
-import com.anderk.ecommerce.lead.application.view.LeadView;
-import com.anderk.ecommerce.lead.domain.model.LeadOutcome;
-import com.anderk.ecommerce.lead.domain.model.LeadSource;
-import com.anderk.ecommerce.lead.domain.model.LeadStatus;
+import com.anderk.ecommerce.lead.application.usecases.CalculateLeadKpiUseCase;
+import com.anderk.ecommerce.lead.application.usecases.CalculateLeadKpiUseCase.CalculateLeadKpiUseCaseCommand;
+import com.anderk.ecommerce.lead.application.usecases.CalculateLeadKpiUseCase.CalculateLeadKpiUseCaseResult;
+import com.anderk.ecommerce.lead.application.usecases.result.KanbanBoardResult;
+import com.anderk.ecommerce.lead.application.usecases.result.LeadDetailResult;
+import com.anderk.ecommerce.lead.application.usecases.result.LeadNoteResult;
+import com.anderk.ecommerce.lead.application.usecases.result.LeadResult;
 import com.anderk.ecommerce.lead.domain.model.Province;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadSource;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadStatus;
 import com.anderk.ecommerce.lead.domain.port.LeadSearchCriteria;
-import com.anderk.ecommerce.shared.pagination.PageRequestDto;
-import com.anderk.ecommerce.shared.pagination.PageResponse;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,11 +50,11 @@ public class AdminLeadController {
 
     private final LeadCommandService leadCommandService;
 
-    private final LeadKpiService leadKpiService;
+    private final CalculateLeadKpiUseCase leadKpiService;
 
     public AdminLeadController(LeadQueryService leadQueryService,
                                LeadCommandService leadCommandService,
-                               LeadKpiService leadKpiService) {
+                               CalculateLeadKpiUseCase leadKpiService) {
         this.leadQueryService = leadQueryService;
         this.leadCommandService = leadCommandService;
         this.leadKpiService = leadKpiService;
@@ -69,8 +71,8 @@ public class AdminLeadController {
      * @param size the page size
      */
     @GetMapping
-    public PageResponse<LeadView> list(
-            @RequestParam(name = "q", required = false) String q,
+    public PageResponse<LeadResult> list(
+            @RequestParam(required = false) String q,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String province,
             @RequestParam(required = false) String source,
@@ -83,14 +85,14 @@ public class AdminLeadController {
 
     /** The detail of a lead, with its timeline, its orders and its notes (HU-25). */
     @GetMapping("/{id}")
-    public LeadDetailView detail(@PathVariable Long id) {
+    public LeadDetailResult detail(@PathVariable Long id) {
         return this.leadQueryService.getDetail(id);
     }
 
     /** Creates a lead by hand, with the origin `MANUAL` (HU-21). */
     @PostMapping
-    public ResponseEntity<LeadView> create(@Valid @RequestBody CreateLeadRequest request) {
-        LeadView created = this.leadCommandService.create(new LeadCommandService.CreateLeadCommand(
+    public ResponseEntity<LeadResult> create(@Valid @RequestBody CreateLeadRequest request) {
+        LeadResult created = this.leadCommandService.create(new LeadCommandService.CreateLeadCommand(
                 request.name(), request.email(), request.phone(), request.province(),
                 request.saleAmount(), request.consent()));
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -98,7 +100,7 @@ public class AdminLeadController {
 
     /** Edits a lead (HU-21). */
     @PutMapping("/{id}")
-    public LeadView update(@PathVariable Long id, @Valid @RequestBody UpdateLeadRequest request) {
+    public LeadResult update(@PathVariable Long id, @Valid @RequestBody UpdateLeadRequest request) {
         return this.leadCommandService.update(id, new LeadCommandService.UpdateLeadCommand(
                 request.name(), request.phone(), request.province(), request.saleAmount(),
                 request.consent()));
@@ -118,14 +120,14 @@ public class AdminLeadController {
      * refused with a 409.
      */
     @PatchMapping("/{id}/status")
-    public LeadView changeStatus(@PathVariable Long id, @Valid @RequestBody ChangeStatusRequest request) {
+    public LeadResult changeStatus(@PathVariable Long id, @Valid @RequestBody ChangeLeadStatusRequest request) {
         return this.leadCommandService.changeStatus(id, new LeadCommandService.ChangeStatusCommand(
                 request.status(), request.outcome(), request.saleAmount()));
     }
 
     /** Writes a note about a lead (HU-25). */
     @PostMapping("/{id}/notes")
-    public ResponseEntity<LeadNoteView> addNote(@PathVariable Long id,
+    public ResponseEntity<LeadNoteResult> addNote(@PathVariable Long id,
                                                  @Valid @RequestBody NoteRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(this.leadCommandService.addNote(id, request.text()));
@@ -133,8 +135,8 @@ public class AdminLeadController {
 
     /** The board of the pipeline (HU-23). */
     @GetMapping("/kanban")
-    public KanbanBoard kanban(
-            @RequestParam(name = "q", required = false) String q,
+    public KanbanBoardResult kanban(
+            @RequestParam(required = false) String q,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String province,
             @RequestParam(required = false) String source) {
@@ -143,72 +145,14 @@ public class AdminLeadController {
 
     /** The indicators of the sales (HU-24). */
     @GetMapping("/kpis")
-    public LeadKpiService.LeadKpis kpis(
+    public CalculateLeadKpiUseCaseResult kpis(
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to) {
         Instant fromInstant = parseInstant(from);
         Instant toInstant = parseInstant(to);
-        return this.leadKpiService.calculate(new LeadKpiService.DateRange(fromInstant, toInstant));
+        return this.leadKpiService.calculate(new CalculateLeadKpiUseCaseCommand(fromInstant, toInstant));
     }
 
-    // --- the bodies ---------------------------------------------------------
-
-    /**
-     * The body of the creation of a lead.
-     *
-     * @param name the name
-     * @param email the email
-     * @param phone the telephone
-     * @param province the province of Ecuador
-     * @param saleAmount the amount of the sale
-     * @param consent whether the lead agreed to be contacted
-     */
-    public record CreateLeadRequest(
-            @NotBlank String name,
-            @NotBlank @Email String email,
-            String phone,
-            Province province,
-            BigDecimal saleAmount,
-            boolean consent) {
-    }
-
-    /**
-     * The body of the edition of a lead.
-     *
-     * @param name the name
-     * @param phone the telephone
-     * @param province the province of Ecuador
-     * @param saleAmount the amount of the sale
-     * @param consent whether the lead agreed to be contacted
-     */
-    public record UpdateLeadRequest(
-            String name,
-            String phone,
-            Province province,
-            BigDecimal saleAmount,
-            boolean consent) {
-    }
-
-    /**
-     * The body of the change of the state of a lead.
-     *
-     * @param status the new state
-     * @param outcome the result, when the lead is closed
-     * @param saleAmount the amount of the sale, when the lead is closed
-     */
-    public record ChangeStatusRequest(
-            LeadStatus status,
-            LeadOutcome outcome,
-            BigDecimal saleAmount) {
-    }
-
-    /**
-     * The body of a note.
-     *
-     * @param text the text of the note
-     */
-    public record NoteRequest(@NotBlank String text) {
-    }
 
     // --- the helpers --------------------------------------------------------
 

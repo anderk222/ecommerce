@@ -2,7 +2,7 @@ package com.anderk.ecommerce.lead.adapter.out.persistence.status_history;
 
 import java.time.Instant;
 
-import com.anderk.ecommerce.lead.domain.model.LeadStatus;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

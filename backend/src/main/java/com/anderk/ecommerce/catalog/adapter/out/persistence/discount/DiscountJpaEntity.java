@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
@@ -41,7 +42,7 @@ public class DiscountJpaEntity {
     @Column(name = "revoked_at")
     private Instant revokedAt;
 
-    @org.springframework.data.annotation.CreatedDate
+    @CreatedDate 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 

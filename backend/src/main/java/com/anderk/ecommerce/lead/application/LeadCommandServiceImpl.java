@@ -3,20 +3,22 @@ package com.anderk.ecommerce.lead.application;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.EnumSet;
+import java.util.List;
 
+import com.anderk.ecommerce.domain.error.ConflictException;
 import com.anderk.ecommerce.domain.error.NotFoundException;
 import com.anderk.ecommerce.domain.error.ValidationException;
-import com.anderk.ecommerce.lead.application.view.LeadView;
+import com.anderk.ecommerce.lead.application.usecases.result.LeadNoteResult;
+import com.anderk.ecommerce.lead.application.usecases.result.LeadResult;
 import com.anderk.ecommerce.lead.domain.model.Lead;
 import com.anderk.ecommerce.lead.domain.model.LeadNote;
-import com.anderk.ecommerce.lead.domain.model.LeadSource;
-import com.anderk.ecommerce.lead.domain.model.LeadStatus;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadSource;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadStatus;
 import com.anderk.ecommerce.lead.domain.model.LeadStatusHistory;
 import com.anderk.ecommerce.lead.domain.policy.LeadStatusPolicy;
 import com.anderk.ecommerce.lead.domain.port.LeadNoteRepository;
 import com.anderk.ecommerce.lead.domain.port.LeadRepository;
 import com.anderk.ecommerce.lead.domain.port.LeadStatusHistoryRepository;
-import com.anderk.ecommerce.shared.annotation.UseCase;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * The use cases that write the leads.
  */
-@UseCase
 @Transactional
 public class LeadCommandServiceImpl implements LeadCommandService {
 
@@ -48,14 +49,11 @@ public class LeadCommandServiceImpl implements LeadCommandService {
     }
 
     @Override
-    public LeadView create(CreateLeadCommand command) {
-        if (command.email() == null || command.email().isBlank()) {
-            throw new ValidationException("El correo del lead es obligatorio",
-                    com.anderk.ecommerce.domain.error.ErrorDetail.of("email", "es obligatorio"));
-        }
+    public LeadResult create(CreateLeadCommand command) {
+
         String email = command.email().trim().toLowerCase(java.util.Locale.ROOT);
         if (this.leadRepository.findByEmail(email).isPresent()) {
-            throw new com.anderk.ecommerce.domain.error.ConflictException(
+            throw new ConflictException(
                     "Ya existe un lead con el correo " + email);
         }
 
@@ -77,7 +75,7 @@ public class LeadCommandServiceImpl implements LeadCommandService {
     }
 
     @Override
-    public LeadView update(Long id, UpdateLeadCommand command) {
+    public LeadResult update(Long id, UpdateLeadCommand command) {
         Lead existing = this.require(id);
 
         Lead updated = new Lead(
@@ -98,7 +96,7 @@ public class LeadCommandServiceImpl implements LeadCommandService {
     }
 
     @Override
-    public LeadView changeStatus(Long id, ChangeStatusCommand command) {
+    public LeadResult changeStatus(Long id, ChangeStatusCommand command) {
         Lead existing = this.require(id);
 
         // The rule lives in the backend: the frontend may not be smarter
@@ -127,7 +125,7 @@ public class LeadCommandServiceImpl implements LeadCommandService {
     }
 
     @Override
-    public LeadNoteView addNote(Long id, String text) {
+    public LeadNoteResult addNote(Long id, String text) {
         this.require(id);
         if (text == null || text.isBlank()) {
             throw new ValidationException("La nota no puede estar vacía",
@@ -135,7 +133,7 @@ public class LeadCommandServiceImpl implements LeadCommandService {
         }
         LeadNote note = this.noteRepository.save(new LeadNote(
                 null, id, text.trim(), this.currentUser(), Instant.now()));
-        return new LeadNoteView(note.id(), note.leadId(), note.body(), note.author(), note.createdAt());
+        return new LeadNoteResult(note.id(), note.leadId(), note.body(), note.author(), note.createdAt());
     }
 
     private Lead require(Long id) {
@@ -151,15 +149,15 @@ public class LeadCommandServiceImpl implements LeadCommandService {
         return authentication.getName();
     }
 
-    private LeadView toView(Lead lead) {
-        return new LeadView(
+    private LeadResult toView(Lead lead) {
+        return new LeadResult(
                 lead.id(),
                 lead.name(),
                 lead.email(),
                 lead.phone(),
                 lead.province(),
                 lead.status(),
-                java.util.List.copyOf(lead.sources()),
+                List.copyOf(lead.sources()),
                 lead.saleAmount(),
                 lead.outcome(),
                 lead.consent(),

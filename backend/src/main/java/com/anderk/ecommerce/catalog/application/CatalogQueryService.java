@@ -9,8 +9,8 @@ import com.anderk.ecommerce.catalog.application.view.CatalogItemDetail;
 import com.anderk.ecommerce.catalog.application.view.CatalogItemSummary;
 import com.anderk.ecommerce.catalog.application.view.HomeContent;
 import com.anderk.ecommerce.catalog.domain.port.CatalogSearchCriteria;
-import com.anderk.ecommerce.shared.pagination.PageRequestDto;
-import com.anderk.ecommerce.shared.pagination.PageResponse;
+import com.anderk.ecommerce.domain.pagination.PageRequestDto;
+import com.anderk.ecommerce.domain.pagination.PageResponse;
 
 /**
  * The inbound port of the **reads** of the catalog.

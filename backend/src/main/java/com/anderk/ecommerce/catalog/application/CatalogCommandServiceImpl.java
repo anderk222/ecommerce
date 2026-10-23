@@ -25,7 +25,6 @@ import com.anderk.ecommerce.catalog.domain.vo.Slug;
 import com.anderk.ecommerce.domain.error.ConflictException;
 import com.anderk.ecommerce.domain.error.NotFoundException;
 import com.anderk.ecommerce.domain.error.ValidationException;
-import com.anderk.ecommerce.shared.annotation.UseCase;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
  * written in the same transaction that discounts it. Nothing here knows
  * about HTTP.
  */
-@UseCase
 @Transactional
 public class CatalogCommandServiceImpl implements CatalogCommandService {
 

@@ -1,6 +1,7 @@
 package com.anderk.ecommerce.tracking.adapter.out.persistence.activity;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.anderk.ecommerce.tracking.domain.model.ActivityEvent;
 import com.anderk.ecommerce.tracking.domain.port.ActivityEventRepository;
@@ -48,14 +49,14 @@ public class JpaActivityEventRepositoryAdapter implements ActivityEventRepositor
     @Transactional(readOnly = true)
     public List<ActivityEvent> findByAnonymousId(String anonymousId, int limit) {
         return this.events.findByAnonymousIdOrderByCreatedAtDesc(
-                        java.util.UUID.fromString(anonymousId), PageRequest.of(0, limit)).stream()
+                        UUID.fromString(anonymousId), PageRequest.of(0, limit)).stream()
                 .map(JpaActivityEventRepositoryAdapter::toDomain)
                 .toList();
     }
 
     @Override
     public int linkToLead(String anonymousId, Long leadId) {
-        return this.events.linkToLead(java.util.UUID.fromString(anonymousId), leadId);
+        return this.events.linkToLead(UUID.fromString(anonymousId), leadId);
     }
 
     private static ActivityEvent toDomain(ActivityEventJpaEntity entity) {

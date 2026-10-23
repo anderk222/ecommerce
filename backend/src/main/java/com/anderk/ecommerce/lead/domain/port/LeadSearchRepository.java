@@ -2,9 +2,9 @@ package com.anderk.ecommerce.lead.domain.port;
 
 import java.util.List;
 
+import com.anderk.ecommerce.domain.pagination.DomainPage;
+import com.anderk.ecommerce.domain.pagination.PageRequestDto;
 import com.anderk.ecommerce.lead.domain.model.Lead;
-import com.anderk.ecommerce.shared.pagination.DomainPage;
-import com.anderk.ecommerce.shared.pagination.PageRequestDto;
 
 /**
  * The outbound port of the **search** of the leads.

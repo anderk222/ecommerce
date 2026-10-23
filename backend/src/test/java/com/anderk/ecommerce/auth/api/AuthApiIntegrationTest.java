@@ -5,8 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Map;
 
 import com.anderk.ecommerce.TestcontainersConfiguration;
-import com.anderk.ecommerce.auth.application.service.TokenService;
+import com.anderk.ecommerce.auth.application.out.TokenService;
 import com.anderk.ecommerce.auth.domain.model.AuthenticatedUser;
+import com.anderk.ecommerce.domain.model.vo.Email;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -94,7 +95,7 @@ class AuthApiIntegrationTest {
         // rule of the routes still needs a witness: a token that carries any
         // other role is refused.
         String token = this.tokenService.issue(
-                new AuthenticatedUser(1L, "sin-rol@xtrim.ec", "Sin rol", "LECTOR"));
+                new AuthenticatedUser(1L, new Email("sin-rol@xtrim.ec"), "Sin rol", "LECTOR"));
 
         ResponseEntity<Map> response = this.restTemplate.exchange(
                 "/api/admin/categories", HttpMethod.GET, authorized(token), Map.class);

@@ -1,7 +1,7 @@
 package com.anderk.ecommerce.lead.domain.policy;
 
 import com.anderk.ecommerce.domain.error.InvalidStatusTransitionException;
-import com.anderk.ecommerce.lead.domain.model.LeadStatus;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadStatus;
 
 /**
  * The rules of the pipeline of the leads (HU-22).

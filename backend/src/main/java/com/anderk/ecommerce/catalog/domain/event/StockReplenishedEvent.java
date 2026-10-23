@@ -11,5 +11,4 @@ package com.anderk.ecommerce.catalog.domain.event;
  * @param previousStock the stock before, zero
  * @param newStock the stock after
  */
-public record StockReplenishedEvent(Long itemId, int previousStock, int newStock) {
-}
+public record StockReplenishedEvent(Long itemId, int previousStock, int newStock) {}

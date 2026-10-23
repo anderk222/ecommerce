@@ -5,33 +5,31 @@ import java.util.List;
 
 import com.anderk.ecommerce.catalog.domain.model.StockSubscription;
 import com.anderk.ecommerce.catalog.domain.port.StockSubscriptionRepository;
-import com.anderk.ecommerce.lead.application.LeadCaptureService;
-import com.anderk.ecommerce.lead.domain.model.LeadSource;
+import com.anderk.ecommerce.lead.application.usecases.CaptureLeadUseCase;
 import com.anderk.ecommerce.lead.domain.model.Province;
-import com.anderk.ecommerce.shared.annotation.UseCase;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadSource;
 
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The use case of the subscriptions of the stock (HU-08).
  */
-@UseCase
 @Transactional
 public class StockSubscriptionServiceImpl implements StockSubscriptionService {
 
     private final StockSubscriptionRepository subscriptionRepository;
 
-    private final LeadCaptureService leadCaptureService;
+    private final CaptureLeadUseCase leadCaptureService;
 
     public StockSubscriptionServiceImpl(StockSubscriptionRepository subscriptionRepository,
-                                        LeadCaptureService leadCaptureService) {
+                                        CaptureLeadUseCase leadCaptureService) {
         this.subscriptionRepository = subscriptionRepository;
         this.leadCaptureService = leadCaptureService;
     }
 
     @Override
     public void subscribe(SubscribeCommand command) {
-        var lead = this.leadCaptureService.capture(new LeadCaptureService.CaptureLeadCommand(
+        var lead = this.leadCaptureService.capture(new CaptureLeadUseCase.CaptureLeadUseCaseCommand(
                 command.name(),
                 command.email(),
                 null,

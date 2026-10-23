@@ -2,6 +2,8 @@ package com.anderk.ecommerce.lead.domain.model;
 
 import java.time.Instant;
 
+import com.anderk.ecommerce.lead.domain.model.enums.LeadStatus;
+
 /**
  * A change of the state of a lead (HU-22).
  *
@@ -18,5 +20,4 @@ public record LeadStatusHistory(
         LeadStatus previousStatus,
         LeadStatus newStatus,
         String changedBy,
-        Instant changedAt) {
-}
+        Instant changedAt) { }

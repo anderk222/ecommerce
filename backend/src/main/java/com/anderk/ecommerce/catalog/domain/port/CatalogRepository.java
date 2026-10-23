@@ -5,8 +5,8 @@ import java.util.Optional;
 
 import com.anderk.ecommerce.catalog.domain.model.CatalogItem;
 import com.anderk.ecommerce.catalog.domain.model.ItemType;
-import com.anderk.ecommerce.shared.pagination.DomainPage;
-import com.anderk.ecommerce.shared.pagination.PageRequestDto;
+import com.anderk.ecommerce.domain.pagination.DomainPage;
+import com.anderk.ecommerce.domain.pagination.PageRequestDto;
 
 /**
  * The outbound port of the catalog aggregate: its reads *and* its writes.

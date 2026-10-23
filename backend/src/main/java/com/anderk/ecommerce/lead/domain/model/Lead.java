@@ -6,6 +6,9 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import com.anderk.ecommerce.domain.error.ValidationException;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadOutcome;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadSource;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadStatus;
 
 /**
  * A lead: a person who showed interest and left a contact (HU-21).

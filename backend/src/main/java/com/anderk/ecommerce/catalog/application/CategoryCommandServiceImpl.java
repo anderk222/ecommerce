@@ -7,14 +7,12 @@ import com.anderk.ecommerce.catalog.domain.vo.Slug;
 import com.anderk.ecommerce.domain.error.ConflictException;
 import com.anderk.ecommerce.domain.error.NotFoundException;
 import com.anderk.ecommerce.domain.error.ValidationException;
-import com.anderk.ecommerce.shared.annotation.UseCase;
 
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The use cases that write the categories.
  */
-@UseCase
 @Transactional
 public class CategoryCommandServiceImpl implements CategoryCommandService {
 

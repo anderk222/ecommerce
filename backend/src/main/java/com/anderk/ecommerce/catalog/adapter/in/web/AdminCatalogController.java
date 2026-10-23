@@ -17,8 +17,8 @@ import com.anderk.ecommerce.catalog.domain.model.Specification;
 import com.anderk.ecommerce.catalog.domain.port.CatalogSearchCriteria;
 import com.anderk.ecommerce.catalog.domain.port.CatalogSort;
 import com.anderk.ecommerce.catalog.domain.port.ItemStateFilter;
-import com.anderk.ecommerce.shared.pagination.PageRequestDto;
-import com.anderk.ecommerce.shared.pagination.PageResponse;
+import com.anderk.ecommerce.domain.pagination.PageRequestDto;
+import com.anderk.ecommerce.domain.pagination.PageResponse;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.validation.Valid;

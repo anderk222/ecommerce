@@ -2,9 +2,9 @@ package com.anderk.ecommerce.lead.domain.port;
 
 import java.time.Instant;
 
-import com.anderk.ecommerce.lead.domain.model.LeadSource;
-import com.anderk.ecommerce.lead.domain.model.LeadStatus;
 import com.anderk.ecommerce.lead.domain.model.Province;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadSource;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadStatus;
 
 /**
  * The criteria of a search of leads (HU-21).

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.UUID;
 
 public interface ActivityEventJpaRepository extends JpaRepository<ActivityEventJpaEntity, Long> {
 
@@ -22,5 +23,5 @@ public interface ActivityEventJpaRepository extends JpaRepository<ActivityEventJ
     @Modifying
     @Query("update ActivityEventJpaEntity e set e.leadId = :leadId "
             + "where e.anonymousId = :anonymousId and e.leadId is null")
-    int linkToLead(@Param("anonymousId") java.util.UUID anonymousId, @Param("leadId") Long leadId);
+    int linkToLead(@Param("anonymousId") UUID anonymousId, @Param("leadId") Long leadId);
 }

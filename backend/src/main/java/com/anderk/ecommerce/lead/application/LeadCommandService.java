@@ -2,9 +2,10 @@ package com.anderk.ecommerce.lead.application;
 
 import java.math.BigDecimal;
 
-import com.anderk.ecommerce.lead.application.view.LeadView;
-import com.anderk.ecommerce.lead.domain.model.LeadOutcome;
-import com.anderk.ecommerce.lead.domain.model.LeadStatus;
+import com.anderk.ecommerce.lead.application.usecases.result.LeadNoteResult;
+import com.anderk.ecommerce.lead.application.usecases.result.LeadResult;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadOutcome;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadStatus;
 import com.anderk.ecommerce.lead.domain.model.Province;
 
 /**
@@ -15,12 +16,12 @@ public interface LeadCommandService {
     /**
      * Creates a lead by hand, with the origin `MANUAL`.
      */
-    LeadView create(CreateLeadCommand command);
+    LeadResult create(CreateLeadCommand command);
 
     /**
      * Edits the data of a lead.
      */
-    LeadView update(Long id, UpdateLeadCommand command);
+    LeadResult update(Long id, UpdateLeadCommand command);
 
     /**
      * Changes the state of a lead.
@@ -31,13 +32,13 @@ public interface LeadCommandService {
      * @throws com.anderk.ecommerce.domain.error.InvalidStatusTransitionException if the transition
      *         is not allowed
      */
-    LeadView changeStatus(Long id, ChangeStatusCommand command);
+    LeadResult changeStatus(Long id, ChangeStatusCommand command);
 
     /** Deletes a lead. */
     void delete(Long id);
 
     /** Writes a note about a lead. */
-    LeadNoteView addNote(Long id, String text);
+    LeadNoteResult addNote(Long id, String text);
 
     /**
      * The creation of a lead by hand.
@@ -49,7 +50,7 @@ public interface LeadCommandService {
      * @param saleAmount the amount of the sale
      * @param consent whether the lead agreed to be contacted
      */
-    record CreateLeadCommand(
+    public record CreateLeadCommand(
             String name,
             String email,
             String phone,
@@ -67,7 +68,7 @@ public interface LeadCommandService {
      * @param saleAmount the amount of the sale
      * @param consent whether the lead agreed to be contacted
      */
-    record UpdateLeadCommand(
+    public record UpdateLeadCommand(
             String name,
             String phone,
             Province province,
@@ -82,6 +83,5 @@ public interface LeadCommandService {
      * @param outcome the result, when the lead is closed
      * @param saleAmount the amount of the sale, when the lead is closed
      */
-    record ChangeStatusCommand(LeadStatus status, LeadOutcome outcome, BigDecimal saleAmount) {
-    }
+    public record ChangeStatusCommand(LeadStatus status, LeadOutcome outcome, BigDecimal saleAmount) {}
 }

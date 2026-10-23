@@ -1,15 +1,13 @@
 package com.anderk.ecommerce.lead.adapter.in.web;
 
-import java.util.List;
 import java.util.Map;
 
-import com.anderk.ecommerce.lead.application.LeadCaptureService;
-import com.anderk.ecommerce.lead.domain.model.LeadSource;
-import com.anderk.ecommerce.lead.domain.model.Province;
+import com.anderk.ecommerce.lead.domain.model.enums.LeadSource;
+import com.anderk.ecommerce.lead.adapter.in.web.dto.InfoRequestRequest;
+import com.anderk.ecommerce.lead.application.usecases.CaptureLeadUseCase;
+import com.anderk.ecommerce.lead.application.usecases.CaptureLeadUseCase.CaptureLeadUseCaseCommand;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,9 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/public")
 public class PublicLeadController {
 
-    private final LeadCaptureService leadCaptureService;
+    private final CaptureLeadUseCase leadCaptureService;
 
-    public PublicLeadController(LeadCaptureService leadCaptureService) {
+    public PublicLeadController(CaptureLeadUseCase leadCaptureService) {
         this.leadCaptureService = leadCaptureService;
     }
 
@@ -41,7 +39,7 @@ public class PublicLeadController {
     public ResponseEntity<Map<String, Object>> infoRequest(
             @Valid @RequestBody InfoRequestRequest request) {
 
-        var lead = this.leadCaptureService.capture(new LeadCaptureService.CaptureLeadCommand(
+        var lead = this.leadCaptureService.capture(new CaptureLeadUseCaseCommand(
                 request.name(),
                 request.email(),
                 request.phone(),
@@ -57,28 +55,5 @@ public class PublicLeadController {
                 "name", lead.name(),
                 "email", lead.email(),
                 "status", lead.status().name()));
-    }
-
-    /**
-     * The body of the request of information.
-     *
-     * @param name the name of the visitor
-     * @param email the email of the visitor
-     * @param phone the telephone of the visitor
-     * @param province the province of Ecuador
-     * @param consent whether the visitor agreed to be contacted
-     * @param anonymousId the browser of the visitor
-     * @param itemIds the items the visitor was interested in
-     * @param message an optional message
-     */
-    public record InfoRequestRequest(
-            @NotBlank String name,
-            @NotBlank @Email String email,
-            String phone,
-            Province province,
-            boolean consent,
-            String anonymousId,
-            List<Long> itemIds,
-            String message) {
     }
 }

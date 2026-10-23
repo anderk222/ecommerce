@@ -2,6 +2,8 @@ package com.anderk.ecommerce.auth.domain.model;
 
 import java.security.Principal;
 
+import com.anderk.ecommerce.domain.model.vo.Email;
+
 /**
  * The member of the staff that is signed in.
  *
@@ -12,13 +14,13 @@ import java.security.Principal;
  * @param nombre the display name
  * @param role {@code ADMIN}
  */
-public record AuthenticatedUser(Long id, String email, String nombre, String role)
+public record AuthenticatedUser(Long id, Email email, String nombre, String role)
         implements Principal {
 
     /** The name of the principal is its email: it is what the security context shows. */
     @Override
     public String getName() {
-        return this.email;
+        return this.email.toString();
     }
 
 

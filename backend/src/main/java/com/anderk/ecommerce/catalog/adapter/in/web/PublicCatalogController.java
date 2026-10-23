@@ -9,8 +9,8 @@ import com.anderk.ecommerce.catalog.domain.model.ItemType;
 import com.anderk.ecommerce.catalog.domain.policy.StockPolicy;
 import com.anderk.ecommerce.catalog.domain.port.CatalogSearchCriteria;
 import com.anderk.ecommerce.catalog.domain.port.CatalogSort;
-import com.anderk.ecommerce.shared.pagination.PageRequestDto;
-import com.anderk.ecommerce.shared.pagination.PageResponse;
+import com.anderk.ecommerce.domain.pagination.PageRequestDto;
+import com.anderk.ecommerce.domain.pagination.PageResponse;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
