@@ -418,7 +418,5 @@ scripts/      dev.sh, lighthouse y utilidades
 ```
 
 **Documentación de apoyo:**
-
-- [`docs/arquitectura-hexagonal-spring-boot.md`](docs/arquitectura-hexagonal-spring-boot.md) — las decisiones del backend.
 - [`docs/modelo-de-datos.md`](docs/modelo-de-datos.md) — tablas, relaciones y reglas en la base.
 - [`docs/preguntas-del-caso.md`](docs/preguntas-del-caso.md) — respuestas al caso práctico y plan de escalabilidad.
